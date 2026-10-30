@@ -1,0 +1,453 @@
+
+@import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Playfair+Display:wght@600;700&display=swap');
+
+/* ========================================
+   1. CLASSBUILD DESIGN SYSTEM
+   ======================================== */
+
+:root {
+    --cb-lavender: #EEE8F7;
+    --cb-sidebar: #F7F3FA;
+    --cb-purple: #66539B;
+    --cb-purple-dark: #463777;
+    --cb-purple-light: #F0EAF8;
+    --cb-ink: #282344;
+    --cb-text: #49435F;
+    --cb-muted: #817A96;
+    --cb-border: #E5DCEC;
+    --cb-white: #FFFFFF;
+    --cb-success-bg: #E7F5EC;
+    --cb-success-text: #276749;
+    --cb-error-bg: #FBEAEC;
+    --cb-error-text: #A63849;
+    --cb-radius: 16px;
+    --cb-shadow: 0 8px 28px rgba(70, 55, 119, 0.06);
+}
+
+/* ========================================
+   2. PAGE BACKGROUND AND BASE TYPOGRAPHY
+   ======================================== */
+
+html,
+body,
+.stApp {
+    font-family: 'DM Sans', sans-serif;
+    color: var(--cb-ink);
+}
+
+.stApp,
+[data-testid="stAppViewContainer"] {
+    background-color: var(--cb-lavender);
+}
+
+/* Keep Streamlit's header layout unchanged */
+[data-testid="stHeader"] {
+    background-color: rgba(238, 232, 247, 0.96);
+}
+
+/* Main content */
+[data-testid="stMain"] {
+    color: var(--cb-ink);
+}
+
+[data-testid="stMainBlockContainer"] {
+    padding-top: 2rem;
+    padding-bottom: 3rem;
+}
+
+/* Paragraphs and regular text */
+[data-testid="stMarkdownContainer"] p {
+    color: var(--cb-text);
+    line-height: 1.75;
+    margin-bottom: 0.8rem;
+}
+
+/* Avoid changing layout or spacing of Streamlit internals */
+p,
+label,
+input,
+textarea,
+button,
+select {
+    font-family: 'DM Sans', sans-serif;
+}
+
+/* ========================================
+   3. HEADINGS
+   ======================================== */
+
+h1,
+h2,
+h3 {
+    font-family: 'Playfair Display', Georgia, serif;
+    color: var(--cb-ink);
+    font-weight: 700;
+    letter-spacing: -0.025em;
+    line-height: 1.3;
+}
+
+h1 {
+    font-size: 2.65rem;
+}
+
+h2 {
+    font-size: 1.9rem;
+}
+
+h3 {
+    font-size: 1.4rem;
+}
+
+/* Keep markdown headings readable */
+[data-testid="stMarkdownContainer"] h1,
+[data-testid="stMarkdownContainer"] h2,
+[data-testid="stMarkdownContainer"] h3 {
+    color: var(--cb-ink);
+    line-height: 1.35;
+    overflow-wrap: break-word;
+}
+
+/* ========================================
+   4. SIDEBAR
+   ======================================== */
+
+[data-testid="stSidebar"] {
+    background-color: var(--cb-sidebar);
+    border-right: 1px solid var(--cb-border);
+}
+
+[data-testid="stSidebar"] > div:first-child {
+    padding-top: 1.5rem;
+}
+
+[data-testid="stSidebar"] h1,
+[data-testid="stSidebar"] h2,
+[data-testid="stSidebar"] h3 {
+    color: var(--cb-purple-dark);
+}
+
+[data-testid="stSidebar"] p {
+    color: var(--cb-text);
+    line-height: 1.7;
+}
+
+[data-testid="stSidebar"] hr {
+    border-color: var(--cb-border);
+    margin-top: 1.4rem;
+    margin-bottom: 1.4rem;
+}
+
+/* ========================================
+   5. CLASSBUILD BRAND CLASSES
+   These apply when the matching classes
+   are present in app.py.
+   ======================================== */
+
+.cb-brand {
+    font-family: 'Playfair Display', Georgia, serif;
+    font-size: 2rem;
+    font-weight: 700;
+    line-height: 1.25;
+    color: var(--cb-purple-dark);
+    margin-bottom: 0.25rem;
+}
+
+.cb-tagline {
+    color: var(--cb-muted);
+    font-size: 0.95rem;
+    line-height: 1.6;
+}
+
+.cb-eyebrow,
+.cb-section-label {
+    color: var(--cb-purple);
+    font-size: 0.76rem;
+    font-weight: 700;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    line-height: 1.5;
+    margin-bottom: 0.6rem;
+}
+
+/* ========================================
+   6. HERO SECTION
+   ======================================== */
+
+.cb-hero {
+    padding: 2rem;
+    margin-bottom: 1.4rem;
+    background-color: rgba(255, 255, 255, 0.88);
+    border: 1px solid var(--cb-border);
+    border-radius: 24px;
+    box-shadow: var(--cb-shadow);
+}
+
+.cb-hero h1 {
+    font-size: clamp(2rem, 3.4vw, 3rem);
+    line-height: 1.2;
+    margin-top: 0;
+    margin-bottom: 0.75rem;
+}
+
+.cb-hero p {
+    color: var(--cb-muted);
+    line-height: 1.8;
+    margin-bottom: 0;
+}
+
+/* ========================================
+   7. CARDS
+   ======================================== */
+
+.cb-card {
+    background-color: var(--cb-white);
+    border: 1px solid var(--cb-border);
+    border-radius: 20px;
+    padding: 1.25rem;
+    margin-bottom: 1rem;
+    box-shadow: var(--cb-shadow);
+}
+
+.cb-card-label {
+    color: var(--cb-muted);
+    font-size: 0.85rem;
+    line-height: 1.5;
+    margin-bottom: 0.4rem;
+}
+
+.cb-card-value {
+    color: var(--cb-purple-dark);
+    font-size: 1.4rem;
+    font-weight: 700;
+    line-height: 1.4;
+    overflow-wrap: anywhere;
+}
+
+.cb-lesson-title {
+    font-family: 'Playfair Display', Georgia, serif;
+    color: var(--cb-ink);
+    font-size: 1.45rem;
+    font-weight: 700;
+    line-height: 1.4;
+    margin-bottom: 0.5rem;
+}
+
+/* ========================================
+   8. BUTTONS
+   ======================================== */
+
+.stButton > button,
+.stFormSubmitButton > button {
+    font-family: 'DM Sans', sans-serif;
+    font-weight: 600;
+    font-size: 0.94rem;
+    line-height: 1.5;
+    border-radius: 12px;
+    padding: 0.6rem 1rem;
+    transition: background-color 0.18s ease,
+                border-color 0.18s ease,
+                color 0.18s ease;
+}
+
+/* Primary buttons */
+.stButton > button[kind="primary"],
+.stFormSubmitButton > button[kind="primary"],
+button[data-testid="stBaseButton-primary"] {
+    background-color: var(--cb-purple);
+    color: var(--cb-white);
+    border: 1px solid var(--cb-purple);
+}
+
+.stButton > button[kind="primary"]:hover,
+.stFormSubmitButton > button[kind="primary"]:hover,
+button[data-testid="stBaseButton-primary"]:hover {
+    background-color: var(--cb-purple-dark);
+    color: var(--cb-white);
+    border-color: var(--cb-purple-dark);
+}
+
+/* Secondary buttons */
+.stButton > button[kind="secondary"],
+.stFormSubmitButton > button[kind="secondary"],
+button[data-testid="stBaseButton-secondary"] {
+    background-color: var(--cb-white);
+    color: var(--cb-purple-dark);
+    border: 1px solid #D8CDE5;
+}
+
+.stButton > button[kind="secondary"]:hover,
+.stFormSubmitButton > button[kind="secondary"]:hover,
+button[data-testid="stBaseButton-secondary"]:hover {
+    background-color: var(--cb-purple-light);
+    color: var(--cb-purple-dark);
+    border-color: var(--cb-purple);
+}
+
+/* ========================================
+   9. INPUTS AND SELECT BOXES
+   ======================================== */
+
+div[data-baseweb="input"] > div,
+div[data-baseweb="select"] > div,
+div[data-baseweb="textarea"] > div {
+    background-color: var(--cb-white);
+    border-color: #DED4E7;
+    border-radius: 12px;
+}
+
+div[data-baseweb="input"] input,
+div[data-baseweb="textarea"] textarea {
+    color: var(--cb-ink);
+    font-family: 'DM Sans', sans-serif;
+    line-height: 1.6;
+}
+
+div[data-baseweb="select"] [role="combobox"] {
+    color: var(--cb-ink);
+    font-family: 'DM Sans', sans-serif;
+}
+
+/* Labels */
+[data-testid="stWidgetLabel"] p {
+    color: var(--cb-text);
+    font-weight: 600;
+    line-height: 1.5;
+}
+
+/* ========================================
+   10. COURSE LESSONS AND EXPANDERS
+   Avoid changing internal flex/grid layout.
+   ======================================== */
+
+div[data-testid="stExpander"] {
+    background-color: var(--cb-white);
+    border: 1px solid var(--cb-border);
+    border-radius: 14px;
+    overflow: hidden;
+}
+
+div[data-testid="stExpander"] summary {
+    background-color: transparent;
+    color: var(--cb-purple-dark);
+    line-height: 1.6;
+}
+
+div[data-testid="stExpander"] summary p {
+    color: var(--cb-purple-dark);
+    line-height: 1.6;
+    margin: 0;
+    overflow-wrap: anywhere;
+}
+
+div[data-testid="stExpander"] [data-testid="stExpanderDetails"] {
+    border-top: 1px solid var(--cb-border);
+    padding-top: 1rem;
+}
+
+/* ========================================
+   11. QUIZ OPTIONS
+   ======================================== */
+
+div[role="radiogroup"] {
+    gap: 0.5rem;
+}
+
+div[role="radiogroup"] label {
+    background-color: var(--cb-white);
+    border: 1px solid var(--cb-border);
+    border-radius: 12px;
+    padding: 0.5rem 0.75rem;
+}
+
+div[role="radiogroup"] label:hover {
+    border-color: #B7A8D4;
+}
+
+div[role="radiogroup"] label:has(input:checked) {
+    background-color: var(--cb-purple-light);
+    border-color: #9B88C2;
+}
+
+/* ========================================
+   12. ALERTS AND CODE
+   ======================================== */
+
+div[data-testid="stAlert"] {
+    border-radius: 14px;
+    line-height: 1.65;
+}
+
+div[data-testid="stAlert"] p {
+    line-height: 1.65;
+}
+
+/* Code blocks */
+div[data-testid="stCode"] {
+    border: 1px solid var(--cb-border);
+    border-radius: 12px;
+    overflow: hidden;
+}
+
+[data-testid="stException"] {
+    border-radius: 12px;
+    overflow-x: auto;
+}
+
+/* ========================================
+   13. DIVIDERS AND CAPTIONS
+   ======================================== */
+
+hr {
+    border: none;
+    border-top: 1px solid var(--cb-border);
+    margin-top: 1.4rem;
+    margin-bottom: 1.4rem;
+}
+
+[data-testid="stCaptionContainer"] {
+    color: var(--cb-muted);
+    line-height: 1.6;
+}
+
+.cb-footer {
+    color: var(--cb-muted);
+    font-size: 0.84rem;
+    line-height: 1.6;
+    text-align: center;
+    padding: 2rem 0 0.5rem;
+}
+
+/* ========================================
+   14. RESPONSIVE DESIGN
+   ======================================== */
+
+@media (max-width: 800px) {
+    h1 {
+        font-size: 2.1rem;
+    }
+
+    h2 {
+        font-size: 1.65rem;
+    }
+
+    h3 {
+        font-size: 1.25rem;
+    }
+
+    .cb-hero {
+        padding: 1.25rem;
+        border-radius: 18px;
+    }
+
+    .cb-hero h1 {
+        font-size: 2rem;
+    }
+
+    .cb-card {
+        padding: 1rem;
+    }
+
+    [data-testid="stMainBlockContainer"] {
+        padding-top: 1.25rem;
+    }
+}
