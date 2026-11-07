@@ -44,3 +44,16 @@ def test_lesson_rejects_missing_title():
 
     with pytest.raises(ValidationError):
         Lesson.model_validate(data)
+
+from classbuild.services.lesson_generator import _without_source_fields
+
+
+def test_ordinary_lesson_schema_excludes_source_ids():
+    schema = _without_source_fields(
+        Lesson.model_json_schema()
+    )
+
+    section_schema = schema["$defs"]["LessonSection"]
+
+    assert "source_ids" not in section_schema["properties"]
+    assert "source_ids" not in section_schema.get("required", [])

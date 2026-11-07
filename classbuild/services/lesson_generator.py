@@ -7,7 +7,22 @@ from classbuild.services.structured_output import (
     request_structured_json,
     StructuredGenerationError,
 )
+from copy import deepcopy
 
+def _without_source_fields(schema: dict) -> dict:
+    schema = deepcopy(schema)
+
+    for definition in schema.get("$defs", {}).values():
+        properties = definition.get("properties", {})
+
+        if "source_ids" in properties:
+            properties.pop("source_ids")
+
+            required = definition.get("required", [])
+            if "source_ids" in required:
+                required.remove("source_ids")
+
+    return schema
 
 SYSTEM_PROMPT = (
     "You create accurate educational content. "
@@ -81,7 +96,9 @@ Additional requirements:
             data = request_structured_json(
                 self.groq_client,
                 prompt=prompt,
-                schema=Lesson.model_json_schema(),
+                schema=_without_source_fields(
+                  Lesson.model_json_schema()
+                 ),
                 schema_name="lesson_content",
                 system_prompts=[
                     SYSTEM_PROMPT,

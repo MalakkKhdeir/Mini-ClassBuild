@@ -5,10 +5,43 @@ from classbuild.course_config import CourseConfig
 from classbuild.llm import GroqClient
 from classbuild.llm.exceptions import GroqClientError
 from classbuild.models.quiz import Quiz
+from classbuild.models.course import Course
 from classbuild.services.course_generator import CourseGenerator, CourseGenerationError
 from classbuild.services.lesson_generator import LessonGenerator, LessonGenerationError
 from classbuild.services.quiz_generator import QuizGenerator, QuizGenerationError
 from classbuild.services.quiz_grader import QuizGrader
+from uuid import uuid4
+from classbuild.rag.document_state import (
+    sync_learning_material,
+    attach_material_to_course,
+)
+
+from classbuild.services.grounded_lesson_generator import (
+    GroundedLessonGenerator,
+    InsufficientEvidenceError,
+)
+
+from classbuild.rag.search_state import get_or_build_index
+from classbuild.rag.document_state import material_for_course
+from classbuild.rag.embeddings import EmbeddingService
+
+from classbuild.services.chat_state import (
+    valid_thread_keys,
+    prune_chats,
+    thread_key,
+    get_history,
+    append_exchange,
+    clear_thread,
+)
+from classbuild.models.lesson import LessonContent
+from classbuild.models.chat import ChatMessage
+from classbuild.services.lesson_chat import (
+    LessonChatService,
+    LessonChatContext,
+    ChatInputError,
+    ChatAnswerError,
+    readable_citations,
+)
 
 
 st.set_page_config(
@@ -33,6 +66,7 @@ DEFAULT_STATE = {
     "quizzes": {},
     "quiz_results": {},
     "quiz_attempts": {},
+    "chats": {},
 }
 for state_key, default_value in DEFAULT_STATE.items():
     if state_key not in st.session_state:
@@ -67,6 +101,28 @@ st.markdown(
 )
 
 with st.expander("⚙️ Course setup", expanded=st.session_state.course_outline is None):
+    uploaded_pdf = st.file_uploader(
+        "Upload course material (PDF)",
+        type=["pdf"],
+        key="course_pdf",
+    )
+
+    upload_data = (
+        (uploaded_pdf.name, uploaded_pdf.getvalue())
+        if uploaded_pdf is not None
+        else None
+    )
+
+    material_status = sync_learning_material(
+        st.session_state,
+        upload_data,
+    )
+
+    if material_status.error:
+        st.warning(material_status.error)
+    elif material_status.document is not None:
+        st.success("PDF course material is ready.")
+
     with st.form("course_form"):
         topic = st.text_input(
             "Course topic",
@@ -98,11 +154,18 @@ if submitted:
             st.session_state.quizzes = {}
             st.session_state.quiz_results = {}
             st.session_state.quiz_attempts = {}
+            st.session_state.chats = {}
         st.session_state.course_config = new_config
         try:
             with st.spinner("Designing your course outline..."):
+
                 course = CourseGenerator(GroqClient()).generate(config)
-            st.session_state.course_outline = course.model_dump()
+                st.session_state.course_id = str(uuid4())
+                st.session_state.course_outline = course.model_dump()
+                attach_material_to_course(st.session_state)
+
+
+
             st.success("Your course outline is ready!")
         except (GroqClientError, CourseGenerationError, ValidationError) as exc:
             st.error("We couldn't generate the course outline. Please try again.")
@@ -144,6 +207,20 @@ with st.expander("🎯 Learning objectives"):
 
 st.markdown("## Course lessons")
 lesson_titles = [lesson["title"] for lesson in outline["lessons"]]
+
+# Keep only chat threads that still belong to the current course,
+# lesson version, and uploaded PDF.
+chat_document = material_for_course(st.session_state)
+chat_document_fingerprint = (
+    chat_document.fingerprint if chat_document is not None else None
+)
+current_valid_chat_keys = valid_thread_keys(
+    course_id=st.session_state.get("course_id", ""),
+    lessons=st.session_state.lesson_contents,
+    lesson_titles=lesson_titles,
+    document_fingerprint=chat_document_fingerprint,
+)
+prune_chats(st.session_state.chats, current_valid_chat_keys)
 for index, lesson in enumerate(outline["lessons"], start=1):
     with st.expander(f"**{index:02d}** · {lesson['title']}"):
         st.write(lesson["summary"])
@@ -161,7 +238,15 @@ selected_title = st.selectbox("Choose a lesson to study", lesson_titles, index=s
 selected_lesson = next(lesson for lesson in outline["lessons"] if lesson["title"] == selected_title)
 st.session_state.selected_lesson = selected_title
 
-cache_key = (course_config["topic"], course_config["difficulty"], course_config["lesson_count"], selected_title)
+
+cache_key = (
+    st.session_state.course_id,
+    course_config["topic"],
+    course_config["difficulty"],
+    course_config["lesson_count"],
+    selected_title,
+)
+
 lesson_content = st.session_state.lesson_contents.get(cache_key)
 
 lesson_col, info_col = st.columns([1.65, 1], gap="large")
@@ -186,19 +271,62 @@ if st.button(
     else:
         try:
             with st.spinner("Preparing your lesson..."):
-                generated_lesson = LessonGenerator(GroqClient()).generate(
-                    lesson_title=selected_title,
-                    learning_objectives=selected_lesson["learning_objectives"],
-                    difficulty=course_config["difficulty"],
-                    course_topic=course_config["topic"],
-                )
+                document = material_for_course(st.session_state)
+
+                if document is not None:
+                    course = Course.model_validate(outline)
+                    embedding_service = EmbeddingService()
+
+                    index = get_or_build_index(
+                        st.session_state,
+                        document,
+                        embedding_service,
+                    )
+
+                    generated_lesson = GroundedLessonGenerator(
+                        GroqClient(),
+                        embedding_service=embedding_service,
+                    ).generate_lesson(
+                        outline=course,
+                        lesson_number=lesson_titles.index(selected_title) + 1,
+                        document=document,
+                        index=index,
+                    )
+                else:
+                    generated_lesson = LessonGenerator(
+                        GroqClient()
+                    ).generate(
+                        lesson_title=selected_title,
+                        learning_objectives=selected_lesson["learning_objectives"],
+                        difficulty=course_config["difficulty"],
+                        course_topic=course_config["topic"],
+                    )
+
             st.session_state.lesson_contents[cache_key] = generated_lesson.model_dump()
             st.success("Lesson content generated and saved.")
             st.rerun()
+
+        except InsufficientEvidenceError as exc:
+            st.warning(
+                "The uploaded PDF does not contain enough relevant information "
+                "to generate this lesson. Try a lesson topic that matches the PDF."
+            )
+            with st.expander("Evidence details"):
+                st.write(f"Reason: {exc.reason}")
+                if exc.passages:
+                    st.write("Retrieved PDF passages:")
+                    for passage in exc.passages:
+                        st.write(
+                            f"- Page {passage.page_number}: "
+                            f"{passage.source_filename} "
+                            f"(similarity: {passage.score:.2f})"
+                        )
+
         except (GroqClientError, LessonGenerationError, ValidationError) as exc:
             st.error("We couldn't generate this lesson. Please try again.")
             with st.expander("Technical details"):
                 st.exception(exc)
+
         except Exception as exc:
             st.error("An unexpected error occurred while generating the lesson.")
             with st.expander("Technical details"):
@@ -220,6 +348,26 @@ for index, section in enumerate(lesson_content["sections"], start=1):
         st.markdown("**Example**")
         st.code(section["example"], language="python")
 
+grounding = lesson_content.get("grounding")
+if grounding:
+    cited_ids = {
+        source_id
+        for section in lesson_content["sections"]
+        for source_id in section.get("source_ids", [])
+    }
+    cited_sources = [
+        source
+        for source in grounding.get("sources", [])
+        if source.get("chunk_id") in cited_ids
+    ]
+    if cited_sources:
+        with st.expander("📚 PDF sources and citations"):
+            for source in cited_sources:
+                st.markdown(
+                    f"- **Page {source['page_number']}** · "
+                    f"{source['source_filename']}"
+                )
+
 with st.container(border=True):
     st.markdown("### ✨ Summary")
     st.write(lesson_content["summary"])
@@ -233,6 +381,161 @@ for index, exercise in enumerate(lesson_content["exercises"]):
             st.write(exercise["task"])
             with st.expander("💡 Show hint"):
                 st.write(exercise["hint"])
+
+# Floating ClassBuild Tutor
+chat_document = material_for_course(st.session_state)
+parsed_lesson_content = LessonContent.model_validate(lesson_content)
+chat_lesson_number = lesson_titles.index(selected_title) + 1
+
+with st.popover(" ", icon=":material/smart_toy:", help="Open ClassBuild Tutor"):
+    st.markdown(
+        """
+        <div class="cb-tutor-header">
+            <div class="cb-tutor-avatar">✦</div>
+            <div>
+                <div class="cb-tutor-title">ClassBuild Tutor</div>
+                <div class="cb-tutor-subtitle">Your personal learning assistant</div>
+            </div>
+        </div>
+        """,
+        unsafe_allow_html=True,
+    )
+
+    st.markdown(
+        f'<div class="cb-tutor-lesson">{selected_title}</div>',
+        unsafe_allow_html=True,
+    )
+
+    use_pdf_chat = False
+    if chat_document is not None:
+        use_pdf_chat = st.toggle(
+            "Use uploaded PDF",
+            value=False,
+            key=f"floating_pdf_chat_mode_{selected_title}",
+            help="Answers will be grounded in retrieved passages from your PDF.",
+        )
+    else:
+        st.caption("Upload a PDF in Course setup to enable PDF-based answers.")
+
+    active_chat_key = thread_key(
+        course_id=st.session_state.course_id,
+        content=parsed_lesson_content,
+        lesson_number=chat_lesson_number,
+        document_fingerprint=(
+            chat_document.fingerprint
+            if use_pdf_chat and chat_document is not None
+            else None
+        ),
+    )
+    chat_history = get_history(st.session_state.chats, active_chat_key)
+
+    if chat_history:
+        transcript_height = min(280, max(150, 92 * len(chat_history)))
+        with st.container(height=transcript_height, border=False):
+            for message in chat_history:
+                is_assistant = message.role == "assistant"
+                with st.chat_message(
+                    message.role,
+                    avatar=":material/smart_toy:" if is_assistant else ":material/person:",
+                ):
+                    if is_assistant and message.mode == "pdf":
+                        st.markdown(readable_citations(message.content, message.sources))
+                        if message.sources:
+                            with st.expander("Sources"):
+                                for source in message.sources:
+                                    st.markdown(
+                                        f"- Page {source.page_number} · {source.source_filename}"
+                                    )
+                    else:
+                        st.markdown(message.content)
+                    if message.status == "insufficient_evidence":
+                        st.info("The uploaded PDF did not provide enough evidence.")
+
+    else:
+        st.markdown(
+            """
+            <div class="cb-tutor-empty">
+                <div class="cb-tutor-empty-icon">✦</div>
+                <div class="cb-tutor-empty-title">What would you like to learn?</div>
+                <div class="cb-tutor-empty-copy">Ask a question about this lesson and I’ll explain it step by step.</div>
+            </div>
+            """,
+            unsafe_allow_html=True,
+        )
+
+    with st.form(
+        key=f"floating_tutor_form_{selected_title}_{'pdf' if use_pdf_chat else 'lesson'}",
+        clear_on_submit=True,
+    ):
+        input_col, send_col = st.columns([8, 1], vertical_alignment="center")
+        with input_col:
+            chat_question = st.text_input(
+                "Your question",
+                placeholder="Message your tutor...",
+                label_visibility="collapsed",
+            )
+        with send_col:
+            send_chat = st.form_submit_button(
+                " ",
+                icon=":material/arrow_upward:",
+                type="primary",
+                help="Send",
+            )
+
+    if chat_history:
+        if st.button(
+            "Clear conversation",
+            key=f"floating_clear_chat_{selected_title}_{'pdf' if use_pdf_chat else 'lesson'}",
+            type="secondary",
+        ):
+            clear_thread(st.session_state.chats, active_chat_key)
+            st.rerun()
+
+    if send_chat and chat_question.strip():
+        try:
+            user_message = ChatMessage(
+                role="user",
+                content=chat_question.strip(),
+                mode="pdf" if use_pdf_chat else "lesson",
+            )
+            with st.spinner("Preparing your explanation..."):
+                pdf_index = None
+                if use_pdf_chat:
+                    embedding_service = EmbeddingService()
+                    pdf_index = get_or_build_index(
+                        st.session_state, chat_document, embedding_service
+                    )
+
+                course_model = Course.model_validate(outline)
+                chat_context = LessonChatContext.from_course(
+                    course=course_model,
+                    lesson_number=chat_lesson_number,
+                    lesson_content=parsed_lesson_content,
+                    topic=course_config["topic"],
+                    difficulty=course_config["difficulty"],
+                )
+                answer_message = LessonChatService().answer(
+                    ctx=chat_context,
+                    question=chat_question.strip(),
+                    history=chat_history,
+                    document=chat_document if use_pdf_chat else None,
+                    index=pdf_index,
+                )
+
+            append_exchange(
+                st.session_state.chats, active_chat_key, user_message, answer_message
+            )
+            st.rerun()
+        except ChatInputError as exc:
+            st.warning(str(exc))
+        except (ChatAnswerError, GroqClientError, ValidationError) as exc:
+            st.error("I couldn't answer your question. Please try again.")
+            with st.expander("Technical details"):
+                st.exception(exc)
+        except Exception as exc:
+            st.error("An unexpected error occurred in Tutor Chat.")
+            with st.expander("Technical details"):
+                st.exception(exc)
 
 st.divider()
 st.markdown('<div class="cb-section-label">Check your understanding</div>', unsafe_allow_html=True)

@@ -6,22 +6,22 @@
    ======================================== */
 
 :root {
-    --cb-lavender: #EEE8F7;
-    --cb-sidebar: #F7F3FA;
-    --cb-purple: #66539B;
-    --cb-purple-dark: #463777;
-    --cb-purple-light: #F0EAF8;
+    --cb-lavender: #F8F7FC;
+    --cb-sidebar: #FFFFFF;
+    --cb-purple: #7057A8;
+    --cb-purple-dark: #493875;
+    --cb-purple-light: #F3EFF9;
     --cb-ink: #282344;
     --cb-text: #49435F;
     --cb-muted: #817A96;
-    --cb-border: #E5DCEC;
+    --cb-border: #EAE5F1;
     --cb-white: #FFFFFF;
     --cb-success-bg: #E7F5EC;
     --cb-success-text: #276749;
     --cb-error-bg: #FBEAEC;
     --cb-error-text: #A63849;
-    --cb-radius: 16px;
-    --cb-shadow: 0 8px 28px rgba(70, 55, 119, 0.06);
+    --cb-radius: 18px;
+    --cb-shadow: 0 6px 24px rgba(70, 55, 119, 0.055);
 }
 
 /* ========================================
@@ -51,8 +51,8 @@ body,
 }
 
 [data-testid="stMainBlockContainer"] {
-    padding-top: 2rem;
-    padding-bottom: 3rem;
+    padding-top: 1.6rem;
+    padding-bottom: 7rem;
 }
 
 /* Paragraphs and regular text */
@@ -174,16 +174,16 @@ h3 {
    ======================================== */
 
 .cb-hero {
-    padding: 2rem;
-    margin-bottom: 1.4rem;
+    padding: 1.7rem 1.9rem;
+    margin-bottom: 1.2rem;
     background-color: rgba(255, 255, 255, 0.88);
     border: 1px solid var(--cb-border);
-    border-radius: 24px;
+    border-radius: 22px;
     box-shadow: var(--cb-shadow);
 }
 
 .cb-hero h1 {
-    font-size: clamp(2rem, 3.4vw, 3rem);
+    font-size: clamp(1.9rem, 3vw, 2.65rem);
     line-height: 1.2;
     margin-top: 0;
     margin-bottom: 0.75rem;
@@ -203,9 +203,10 @@ h3 {
     background-color: var(--cb-white);
     border: 1px solid var(--cb-border);
     border-radius: 20px;
-    padding: 1.25rem;
+    padding: 1.35rem;
     margin-bottom: 1rem;
     box-shadow: var(--cb-shadow);
+    transition: transform 0.18s ease, box-shadow 0.18s ease, border-color 0.18s ease;
 }
 
 .cb-card-label {
@@ -450,4 +451,1230 @@ hr {
     [data-testid="stMainBlockContainer"] {
         padding-top: 1.25rem;
     }
+}
+
+
+/* ========================================
+   15. POLISH: CLEANER LEARNING DASHBOARD
+   ======================================== */
+
+/* Slightly narrower visual rhythm on very wide screens */
+[data-testid="stMainBlockContainer"] {
+    max-width: 1500px;
+}
+
+/* Sidebar brand and separators */
+[data-testid="stSidebar"] {
+    box-shadow: 1px 0 14px rgba(70, 55, 119, 0.025);
+}
+
+[data-testid="stSidebar"] [data-testid="stMarkdownContainer"] {
+    overflow-wrap: anywhere;
+}
+
+/* Hero: subtle depth, less visual heaviness */
+.cb-hero {
+    background: linear-gradient(135deg, #FFFFFF 0%, #FBFAFE 100%);
+}
+
+/* Cards: gentle hover, no movement that changes document flow */
+.cb-card:hover {
+    border-color: #D8CDE8;
+    box-shadow: 0 10px 28px rgba(70, 55, 119, 0.085);
+    transform: translateY(-2px);
+}
+
+/* More consistent spacing and shape for Streamlit containers */
+div[data-testid="stVerticalBlockBorderWrapper"] {
+    border-radius: 18px;
+}
+
+/* Inputs: clearer focus state */
+div[data-baseweb="input"] > div:focus-within,
+div[data-baseweb="textarea"] > div:focus-within,
+div[data-baseweb="select"] > div:focus-within {
+    border-color: #8D78B8;
+    box-shadow: 0 0 0 2px rgba(112, 87, 168, 0.12);
+}
+
+/* Buttons: subtle lift on hover */
+.stButton > button,
+.stFormSubmitButton > button {
+    min-height: 2.65rem;
+    transition: transform 0.18s ease, background-color 0.18s ease,
+                border-color 0.18s ease, box-shadow 0.18s ease;
+}
+
+.stButton > button:hover,
+.stFormSubmitButton > button:hover {
+    box-shadow: 0 4px 12px rgba(70, 55, 119, 0.10);
+    transform: translateY(-1px);
+}
+
+/* Expander headers feel more like lesson rows */
+div[data-testid="stExpander"] {
+    box-shadow: 0 3px 14px rgba(70, 55, 119, 0.035);
+    transition: border-color 0.18s ease, box-shadow 0.18s ease;
+}
+
+div[data-testid="stExpander"]:hover {
+    border-color: #D8CDE8;
+    box-shadow: 0 5px 18px rgba(70, 55, 119, 0.065);
+}
+
+/* Keep long lesson text and code comfortably readable */
+[data-testid="stMarkdownContainer"] pre {
+    border-radius: 12px;
+}
+
+[data-testid="stMarkdownContainer"] code {
+    border-radius: 5px;
+}
+
+/* Streamlit's bottom chat input can be fixed by the app.
+   Reserve space so the last cards/content are not hidden behind it. */
+[data-testid="stMainBlockContainer"] {
+    padding-bottom: 8rem;
+}
+
+/* Responsive refinements */
+@media (max-width: 800px) {
+    [data-testid="stMainBlockContainer"] {
+        padding-left: 1rem;
+        padding-right: 1rem;
+        padding-bottom: 7rem;
+    }
+
+    .cb-hero {
+        padding: 1.25rem 1.3rem;
+    }
+}
+
+/* Respect reduced-motion preferences */
+@media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+        transition-duration: 0.01ms !important;
+        animation-duration: 0.01ms !important;
+        scroll-behavior: auto !important;
+    }
+}
+
+
+/* ========================================
+   16. BUTTONS + TUTOR CHAT REDESIGN
+   ======================================== */
+
+/* Main action buttons */
+.stButton > button,
+.stFormSubmitButton > button {
+    min-height: 2.8rem;
+    padding: 0.68rem 1.25rem;
+    border-radius: 13px;
+    font-size: 0.94rem;
+    font-weight: 700;
+    letter-spacing: 0.005em;
+}
+
+/* Primary actions: rich purple */
+.stButton > button[kind="primary"],
+.stFormSubmitButton > button[kind="primary"],
+button[data-testid="stBaseButton-primary"] {
+    background: linear-gradient(135deg, #765DB0 0%, #59428F 100%);
+    color: #FFFFFF;
+    border: 1px solid #59428F;
+    box-shadow: 0 5px 13px rgba(89, 66, 143, 0.18);
+}
+
+.stButton > button[kind="primary"]:hover,
+.stFormSubmitButton > button[kind="primary"]:hover,
+button[data-testid="stBaseButton-primary"]:hover {
+    background: linear-gradient(135deg, #654D9F 0%, #493875 100%);
+    border-color: #493875;
+    box-shadow: 0 7px 17px rgba(89, 66, 143, 0.23);
+    transform: translateY(-1px);
+}
+
+/* Secondary actions */
+.stButton > button[kind="secondary"],
+.stFormSubmitButton > button[kind="secondary"],
+button[data-testid="stBaseButton-secondary"] {
+    background: #FFFFFF;
+    color: #59428F;
+    border: 1px solid #DED5EC;
+}
+
+.stButton > button[kind="secondary"]:hover,
+.stFormSubmitButton > button[kind="secondary"]:hover,
+button[data-testid="stBaseButton-secondary"]:hover {
+    background: #F4F0FA;
+    border-color: #A895C9;
+    color: #493875;
+}
+
+/* Tutor chat section heading and messages */
+[data-testid="stChatMessage"] {
+    border: 1px solid #EAE5F1;
+    border-radius: 17px;
+    padding: 1rem 1.1rem;
+    margin: 0.7rem 0;
+    box-shadow: 0 3px 12px rgba(70, 55, 119, 0.035);
+}
+
+/* Assistant message surface */
+[data-testid="stChatMessage"]:has([data-testid="chatAvatarIcon-assistant"]) {
+    background: #FFFFFF;
+}
+
+/* User message surface */
+[data-testid="stChatMessage"]:has([data-testid="chatAvatarIcon-user"]) {
+    background: #F1ECF8;
+    border-color: #E2D9EF;
+}
+
+/* Chat message text */
+[data-testid="stChatMessage"] [data-testid="stMarkdownContainer"] p {
+    color: #39324F;
+    line-height: 1.75;
+}
+
+/* Chat input dock */
+[data-testid="stChatInput"] {
+    border: 1px solid #DED5EC;
+    border-radius: 17px;
+    background: rgba(255, 255, 255, 0.97);
+    box-shadow: 0 8px 26px rgba(70, 55, 119, 0.11);
+    padding: 0.25rem;
+}
+
+[data-testid="stChatInput"] textarea {
+    color: #282344;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.96rem;
+    line-height: 1.6;
+}
+
+[data-testid="stChatInput"] textarea::placeholder {
+    color: #9189A2;
+    opacity: 1;
+}
+
+/* Send button inside chat input */
+[data-testid="stChatInput"] button {
+    background: #7057A8;
+    color: #FFFFFF;
+    border: none;
+    border-radius: 11px;
+    transition: background-color 0.18s ease, transform 0.18s ease;
+}
+
+[data-testid="stChatInput"] button:hover {
+    background: #493875;
+    color: #FFFFFF;
+    transform: translateY(-1px);
+}
+
+/* Tutor controls: clear chat button and PDF mode toggle */
+[data-testid="stToggle"] label {
+    color: #594B70;
+    font-weight: 600;
+}
+
+[data-testid="stChatMessage"] pre {
+    border-radius: 12px;
+}
+
+/* Small screens */
+@media (max-width: 800px) {
+    [data-testid="stChatMessage"] {
+        padding: 0.8rem;
+        border-radius: 14px;
+    }
+
+    .stButton > button,
+    .stFormSubmitButton > button {
+        width: 100%;
+    }
+}
+
+
+/* ========================================
+   17. HIGH-CONTRAST CLASSBUILD THEME
+   ======================================== */
+
+:root {
+    --cb-lavender: #F1EEF7;
+    --cb-sidebar: #E9E3F1;
+    --cb-purple: #59418D;
+    --cb-purple-dark: #3E2D68;
+    --cb-purple-light: #E8E0F2;
+    --cb-ink: #211B33;
+    --cb-text: #39324B;
+    --cb-muted: #625A72;
+    --cb-border: #D6CDE2;
+    --cb-white: #FFFFFF;
+    --cb-shadow: 0 7px 22px rgba(47, 34, 76, 0.09);
+}
+
+/* Stronger, clearer typography */
+html, body, .stApp,
+[data-testid="stAppViewContainer"],
+[data-testid="stMain"],
+[data-testid="stSidebar"] {
+    color: #211B33 !important;
+    font-family: "Inter", "DM Sans", Arial, sans-serif !important;
+}
+
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
+
+p, label, input, textarea, select,
+[data-testid="stMarkdownContainer"] p,
+[data-testid="stWidgetLabel"] p {
+    color: #39324B;
+    font-weight: 500;
+}
+
+[data-testid="stCaptionContainer"],
+[data-testid="stCaptionContainer"] p {
+    color: #625A72 !important;
+}
+
+/* Less washed-out page background */
+.stApp,
+[data-testid="stAppViewContainer"] {
+    background: #F1EEF7 !important;
+}
+
+[data-testid="stHeader"] {
+    background: #F1EEF7 !important;
+}
+
+[data-testid="stSidebar"] {
+    background: #E9E3F1 !important;
+    border-right: 1px solid #D6CDE2;
+}
+
+/* More readable headings */
+h1, h2, h3,
+[data-testid="stMarkdownContainer"] h1,
+[data-testid="stMarkdownContainer"] h2,
+[data-testid="stMarkdownContainer"] h3 {
+    color: #211B33 !important;
+    font-family: "Inter", "DM Sans", Arial, sans-serif !important;
+    font-weight: 800 !important;
+    letter-spacing: -0.035em;
+}
+
+/* Cards and forms */
+.cb-hero,
+.cb-card,
+div[data-testid="stExpander"],
+div[data-testid="stVerticalBlockBorderWrapper"],
+[data-testid="stForm"] {
+    background: #FFFFFF !important;
+    border-color: #D6CDE2 !important;
+    box-shadow: 0 5px 18px rgba(47, 34, 76, 0.055);
+}
+
+.cb-hero {
+    background: linear-gradient(135deg, #FFFFFF 0%, #F7F4FB 100%) !important;
+}
+
+div[data-testid="stExpander"] summary,
+div[data-testid="stExpander"] summary p {
+    color: #3E2D68 !important;
+    font-weight: 700 !important;
+}
+
+/* Make EVERY button consistent.
+   Streamlit versions use different internal button attributes,
+   so target the stable visible button containers too. */
+.stButton > button,
+.stFormSubmitButton > button,
+[data-testid="stBaseButton-primary"],
+[data-testid="stBaseButton-secondary"],
+[data-testid="stFormSubmitButton"] button {
+    background: #59418D !important;
+    color: #FFFFFF !important;
+    border: 1px solid #59418D !important;
+    border-radius: 13px !important;
+    font-family: "Inter", "DM Sans", Arial, sans-serif !important;
+    font-size: 0.96rem !important;
+    font-weight: 700 !important;
+    min-height: 2.75rem;
+    box-shadow: 0 4px 11px rgba(62, 45, 104, 0.15);
+}
+
+.stButton > button *,
+.stFormSubmitButton > button *,
+[data-testid="stBaseButton-primary"] *,
+[data-testid="stBaseButton-secondary"] * {
+    color: #FFFFFF !important;
+}
+
+.stButton > button:hover,
+.stFormSubmitButton > button:hover,
+[data-testid="stBaseButton-primary"]:hover,
+[data-testid="stBaseButton-secondary"]:hover,
+[data-testid="stFormSubmitButton"] button:hover {
+    background: #3E2D68 !important;
+    border-color: #3E2D68 !important;
+    color: #FFFFFF !important;
+    box-shadow: 0 6px 15px rgba(62, 45, 104, 0.22);
+    transform: translateY(-1px);
+}
+
+/* Explicitly neutralize accidental red/bright button styling */
+button[kind="primary"],
+button[kind="secondary"],
+button[data-testid*="Submit"],
+button[data-testid*="submit"] {
+    background-color: #59418D !important;
+    color: #FFFFFF !important;
+}
+
+/* Inputs */
+div[data-baseweb="input"] > div,
+div[data-baseweb="select"] > div,
+div[data-baseweb="textarea"] > div {
+    background: #FFFFFF !important;
+    border: 1px solid #D0C6DE !important;
+    border-radius: 12px !important;
+}
+
+div[data-baseweb="input"] input,
+div[data-baseweb="textarea"] textarea,
+div[data-baseweb="select"] [role="combobox"] {
+    color: #211B33 !important;
+    font-weight: 500 !important;
+}
+
+/* Slider: replace Streamlit's default red with brand purple */
+[data-testid="stSlider"] [data-baseweb="slider"] div[role="slider"] {
+    background: #59418D !important;
+    border-color: #59418D !important;
+}
+
+[data-testid="stSlider"] [data-baseweb="slider"] > div > div {
+    background: #59418D !important;
+}
+
+/* Tutor chat */
+[data-testid="stChatMessage"] {
+    border: 1px solid #D6CDE2 !important;
+    border-radius: 16px !important;
+    padding: 1rem 1.15rem !important;
+    background: #FFFFFF !important;
+    box-shadow: 0 4px 14px rgba(47, 34, 76, 0.06);
+}
+
+[data-testid="stChatMessage"]:has([data-testid="chatAvatarIcon-user"]) {
+    background: #E8E0F2 !important;
+    border-color: #D3C6E4 !important;
+}
+
+[data-testid="stChatMessage"] p {
+    color: #302943 !important;
+    line-height: 1.75;
+}
+
+[data-testid="stChatInput"] {
+    background: #FFFFFF !important;
+    border: 1.5px solid #CFC3DF !important;
+    border-radius: 16px !important;
+    box-shadow: 0 6px 20px rgba(47, 34, 76, 0.10) !important;
+}
+
+[data-testid="stChatInput"] textarea {
+    color: #211B33 !important;
+    font-family: "Inter", "DM Sans", Arial, sans-serif !important;
+}
+
+[data-testid="stChatInput"] button {
+    background: #59418D !important;
+    color: #FFFFFF !important;
+    border-radius: 11px !important;
+}
+
+[data-testid="stChatInput"] button:hover {
+    background: #3E2D68 !important;
+}
+
+/* Radio answers and toggles */
+div[role="radiogroup"] label {
+    background: #FFFFFF !important;
+    border: 1px solid #D6CDE2 !important;
+    color: #302943 !important;
+    border-radius: 12px !important;
+}
+
+div[role="radiogroup"] label:has(input:checked) {
+    background: #E8E0F2 !important;
+    border-color: #8069A8 !important;
+}
+
+/* Alerts and code */
+div[data-testid="stAlert"] {
+    border-radius: 13px !important;
+}
+
+div[data-testid="stCode"] {
+    border: 1px solid #D6CDE2 !important;
+    border-radius: 13px !important;
+}
+
+/* Remove overly pale appearance on smaller screens too */
+@media (max-width: 800px) {
+    [data-testid="stSidebar"] {
+        background: #E9E3F1 !important;
+    }
+}
+
+
+/* Floating Tutor launcher */
+div[data-testid="stPopover"] {
+    position: fixed !important;
+    right: 26px !important;
+    bottom: 24px !important;
+    z-index: 99999 !important;
+    width: auto !important;
+}
+
+div[data-testid="stPopover"] > button {
+    width: 64px !important;
+    height: 64px !important;
+    min-height: 64px !important;
+    padding: 0 !important;
+    border-radius: 50% !important;
+    background: #59418D !important;
+    color: #FFFFFF !important;
+    border: 2px solid #FFFFFF !important;
+    box-shadow: 0 7px 22px rgba(42, 29, 70, 0.28) !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+}
+
+div[data-testid="stPopover"] > button:hover {
+    background: #3E2D68 !important;
+    transform: translateY(-2px);
+}
+
+div[data-testid="stPopoverBody"] {
+    width: min(390px, calc(100vw - 32px)) !important;
+    max-width: min(390px, calc(100vw - 32px)) !important;
+    border: 1px solid #D6CDE2 !important;
+    border-radius: 18px !important;
+    background: #FBFAFD !important;
+    box-shadow: 0 14px 40px rgba(42, 29, 70, 0.20) !important;
+    padding: 1rem !important;
+}
+
+div[data-testid="stPopoverBody"] [data-testid="stChatMessage"] {
+    padding: 0.7rem 0.8rem !important;
+    margin: 0.45rem 0 !important;
+}
+
+@media (max-width: 600px) {
+    div[data-testid="stPopover"] {
+        right: 16px !important;
+        bottom: 16px !important;
+    }
+    div[data-testid="stPopover"] > button {
+        width: 58px !important;
+        height: 58px !important;
+        min-height: 58px !important;
+    }
+}
+
+
+/* ========================================
+   19. COMPACT FLOATING TUTOR — ICON + SPACING
+   ======================================== */
+
+/* The launcher is a true round button with no visible "Tutor" label */
+div[data-testid="stPopover"] {
+    position: fixed !important;
+    right: 28px !important;
+    bottom: 26px !important;
+    z-index: 100000 !important;
+    width: 62px !important;
+    height: 62px !important;
+    margin: 0 !important;
+}
+
+div[data-testid="stPopover"] > button {
+    width: 62px !important;
+    min-width: 62px !important;
+    height: 62px !important;
+    min-height: 62px !important;
+    padding: 0 !important;
+    margin: 0 !important;
+    border-radius: 50% !important;
+    background: #493875 !important;
+    color: #FFFFFF !important;
+    border: 2px solid #FFFFFF !important;
+    box-shadow: 0 5px 18px rgba(43, 31, 70, 0.30) !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    gap: 0 !important;
+    font-size: 0 !important;
+    line-height: 1 !important;
+}
+
+div[data-testid="stPopover"] > button:hover {
+    background: #352653 !important;
+    transform: translateY(-2px) !important;
+}
+
+/* Keep the material icon visible, hide only the label */
+div[data-testid="stPopover"] > button [data-testid="stMarkdownContainer"],
+div[data-testid="stPopover"] > button p {
+    display: none !important;
+}
+
+div[data-testid="stPopover"] > button span[translate="no"],
+div[data-testid="stPopover"] > button span.material-symbols-rounded {
+    display: inline-flex !important;
+    color: #FFFFFF !important;
+    font-size: 29px !important;
+    line-height: 1 !important;
+    font-weight: 400 !important;
+}
+
+/* Compact popover window: prevent the tall empty panel */
+div[data-testid="stPopoverBody"] {
+    width: 360px !important;
+    max-width: min(360px, calc(100vw - 28px)) !important;
+    max-height: min(470px, calc(100vh - 110px)) !important;
+    overflow-y: auto !important;
+    padding: 14px !important;
+    border: 1px solid #D6CDE2 !important;
+    border-radius: 18px !important;
+    background: #FBFAFD !important;
+    box-shadow: 0 12px 34px rgba(42, 29, 70, 0.22) !important;
+}
+
+/* Reduce excess internal vertical spacing */
+div[data-testid="stPopoverBody"] [data-testid="stVerticalBlock"] {
+    gap: 0.55rem !important;
+}
+
+div[data-testid="stPopoverBody"] h3 {
+    margin: 0 0 0.15rem 0 !important;
+    font-size: 1.1rem !important;
+}
+
+div[data-testid="stPopoverBody"] [data-testid="stVerticalBlockBorderWrapper"] {
+    padding: 0 !important;
+}
+
+/* Chat transcript should be compact and scroll independently */
+div[data-testid="stPopoverBody"] [data-testid="stVerticalBlock"] [style*="height: 340px"] {
+    height: 230px !important;
+    min-height: 150px !important;
+    max-height: 230px !important;
+    overflow-y: auto !important;
+}
+
+/* More compact message cards */
+div[data-testid="stPopoverBody"] [data-testid="stChatMessage"] {
+    padding: 0.55rem 0.7rem !important;
+    margin: 0.3rem 0 !important;
+    border-radius: 13px !important;
+}
+
+/* Form and send button spacing */
+div[data-testid="stPopoverBody"] [data-testid="stForm"] {
+    padding: 9px !important;
+    margin-top: 4px !important;
+    border-radius: 13px !important;
+}
+
+div[data-testid="stPopoverBody"] [data-testid="stFormSubmitButton"] button {
+    min-height: 42px !important;
+    border-radius: 11px !important;
+    margin-top: 4px !important;
+}
+
+/* On narrow screens, keep the launcher away from the edges */
+@media (max-width: 600px) {
+    div[data-testid="stPopover"] {
+        right: 16px !important;
+        bottom: 18px !important;
+        width: 56px !important;
+        height: 56px !important;
+    }
+
+    div[data-testid="stPopover"] > button {
+        width: 56px !important;
+        min-width: 56px !important;
+        height: 56px !important;
+        min-height: 56px !important;
+    }
+
+    div[data-testid="stPopoverBody"] {
+        width: min(330px, calc(100vw - 24px)) !important;
+        max-width: calc(100vw - 24px) !important;
+        max-height: calc(100vh - 100px) !important;
+    }
+}
+
+
+/* ========================================
+   20. TUTOR POPOVER — TIGHTER VERTICAL LAYOUT
+   ======================================== */
+
+div[data-testid="stPopoverBody"] {
+    width: 360px !important;
+    max-width: min(360px, calc(100vw - 28px)) !important;
+    max-height: min(430px, calc(100vh - 90px)) !important;
+    overflow-y: auto !important;
+    padding: 12px 14px 14px !important;
+}
+
+/* Remove Streamlit's generous default vertical gaps inside the popover */
+div[data-testid="stPopoverBody"] [data-testid="stVerticalBlock"] {
+    gap: 0.32rem !important;
+}
+
+/* Compact title and explanatory text */
+div[data-testid="stPopoverBody"] h3 {
+    margin: 0 !important;
+    padding: 0 !important;
+    font-size: 1.05rem !important;
+    line-height: 1.3 !important;
+}
+
+div[data-testid="stPopoverBody"] [data-testid="stCaptionContainer"] {
+    margin: 0 !important;
+    padding: 0 !important;
+}
+
+div[data-testid="stPopoverBody"] [data-testid="stCaptionContainer"] p {
+    font-size: 0.82rem !important;
+    line-height: 1.35 !important;
+    margin: 0 !important;
+}
+
+/* PDF toggle should not stretch the whole layout */
+div[data-testid="stPopoverBody"] [data-testid="stToggle"] {
+    margin: 2px 0 !important;
+}
+
+/* Clear icon button: compact square, never clipped text */
+div[data-testid="stPopoverBody"] [data-testid="stButton"] button {
+    min-width: 36px !important;
+    width: 36px !important;
+    min-height: 36px !important;
+    height: 36px !important;
+    padding: 0 !important;
+    border-radius: 10px !important;
+}
+
+/* Empty-state line takes little room */
+div[data-testid="stPopoverBody"] [data-testid="stCaptionContainer"] p {
+    overflow-wrap: anywhere;
+}
+
+/* Transcript height only applies when there are actual messages */
+div[data-testid="stPopoverBody"] [data-testid="stVerticalBlockBorderWrapper"] {
+    padding: 0 !important;
+}
+
+/* Form is compact and stays directly below the conversation */
+div[data-testid="stPopoverBody"] [data-testid="stForm"] {
+    margin-top: 2px !important;
+    padding: 8px !important;
+    border-radius: 12px !important;
+}
+
+div[data-testid="stPopoverBody"] [data-testid="stForm"] [data-testid="stTextInput"] {
+    margin-bottom: 4px !important;
+}
+
+div[data-testid="stPopoverBody"] [data-testid="stForm"] input {
+    min-height: 40px !important;
+    padding: 0.55rem 0.75rem !important;
+}
+
+div[data-testid="stPopoverBody"] [data-testid="stFormSubmitButton"] button {
+    min-height: 40px !important;
+    height: 40px !important;
+    margin-top: 0 !important;
+}
+
+/* Keep the panel anchored above the floating launcher */
+@media (max-width: 600px) {
+    div[data-testid="stPopoverBody"] {
+        width: min(330px, calc(100vw - 24px)) !important;
+        max-width: calc(100vw - 24px) !important;
+        max-height: calc(100vh - 90px) !important;
+    }
+}
+
+
+/* ========================================
+   21. CLASSBUILD TUTOR — FINAL CHAT POLISH
+   ======================================== */
+
+/* Popover panel: compact, clean, no oversized blank area */
+div[data-testid="stPopoverBody"] {
+    width: 410px !important;
+    max-width: min(410px, calc(100vw - 28px)) !important;
+    max-height: min(560px, calc(100vh - 100px)) !important;
+    overflow-y: auto !important;
+    padding: 15px !important;
+    border: 1px solid #D8CFE5 !important;
+    border-radius: 20px !important;
+    background: #FCFBFE !important;
+    box-shadow: 0 16px 42px rgba(43, 31, 70, 0.22) !important;
+}
+
+/* Tight, consistent spacing */
+div[data-testid="stPopoverBody"] [data-testid="stVerticalBlock"] {
+    gap: 0.4rem !important;
+}
+
+div[data-testid="stPopoverBody"] h3 {
+    color: #302448 !important;
+    font-size: 1.08rem !important;
+    font-weight: 800 !important;
+    line-height: 1.25 !important;
+    margin: 0 !important;
+}
+
+div[data-testid="stPopoverBody"] [data-testid="stCaptionContainer"] p {
+    color: #756D83 !important;
+    font-size: 0.82rem !important;
+    line-height: 1.4 !important;
+    margin: 0 !important;
+}
+
+.cb-chat-context {
+    display: inline-block;
+    max-width: 100%;
+    padding: 6px 10px;
+    margin: 2px 0 4px;
+    border-radius: 9px;
+    background: #EEE9F5;
+    color: #59418D;
+    font-size: 0.76rem;
+    font-weight: 700;
+    overflow-wrap: anywhere;
+}
+
+/* Independent transcript area; keep it short enough for the input to remain visible */
+div[data-testid="stPopoverBody"] [data-testid="stVerticalBlockBorderWrapper"] {
+    padding: 0 !important;
+}
+
+div[data-testid="stPopoverBody"] [data-testid="stChatMessage"] {
+    display: flex !important;
+    align-items: flex-start !important;
+    gap: 9px !important;
+    padding: 0.7rem 0.8rem !important;
+    margin: 0.35rem 0 !important;
+    border: 1px solid #E7E1EF !important;
+    border-radius: 14px !important;
+    background: #FFFFFF !important;
+    box-shadow: 0 2px 8px rgba(43, 31, 70, 0.035) !important;
+}
+
+div[data-testid="stPopoverBody"] [data-testid="stChatMessage"] p {
+    color: #302943 !important;
+    font-size: 0.88rem !important;
+    line-height: 1.6 !important;
+}
+
+/* Consistent assistant/user avatars */
+div[data-testid="stPopoverBody"] [data-testid="chatAvatarIcon-assistant"] {
+    color: #59418D !important;
+    background: #EEE9F5 !important;
+    border-radius: 10px !important;
+    padding: 5px !important;
+}
+
+div[data-testid="stPopoverBody"] [data-testid="chatAvatarIcon-user"] {
+    color: #FFFFFF !important;
+    background: #75609E !important;
+    border-radius: 10px !important;
+    padding: 5px !important;
+}
+
+/* Input dock stays visible at the bottom of the popover */
+div[data-testid="stPopoverBody"] [data-testid="stForm"] {
+    position: sticky !important;
+    bottom: 0 !important;
+    z-index: 5 !important;
+    background: #FCFBFE !important;
+    border: 1px solid #DED5EA !important;
+    border-radius: 15px !important;
+    padding: 9px !important;
+    margin-top: 6px !important;
+    box-shadow: 0 -5px 14px rgba(43, 31, 70, 0.06) !important;
+}
+
+div[data-testid="stPopoverBody"] [data-testid="stForm"] [data-testid="stHorizontalBlock"] {
+    align-items: center !important;
+    gap: 8px !important;
+}
+
+div[data-testid="stPopoverBody"] [data-testid="stForm"] [data-testid="stTextInput"] {
+    margin: 0 !important;
+}
+
+div[data-testid="stPopoverBody"] [data-testid="stForm"] input {
+    min-height: 43px !important;
+    height: 43px !important;
+    border: 0 !important;
+    background: #F0EDF5 !important;
+    border-radius: 11px !important;
+    color: #302448 !important;
+    font-size: 0.88rem !important;
+}
+
+div[data-testid="stPopoverBody"] [data-testid="stFormSubmitButton"] button {
+    width: 43px !important;
+    min-width: 43px !important;
+    height: 43px !important;
+    min-height: 43px !important;
+    padding: 0 !important;
+    border-radius: 11px !important;
+    background: #59418D !important;
+    color: #FFFFFF !important;
+    border: none !important;
+    box-shadow: none !important;
+}
+
+div[data-testid="stPopoverBody"] [data-testid="stFormSubmitButton"] button span {
+    color: #FFFFFF !important;
+}
+
+/* Clear-history icon in the header */
+div[data-testid="stPopoverBody"] [data-testid="stButton"] button {
+    width: 36px !important;
+    min-width: 36px !important;
+    height: 36px !important;
+    min-height: 36px !important;
+    border-radius: 10px !important;
+    padding: 0 !important;
+}
+
+/* Make the launcher a crisp, consistent round robot button */
+div[data-testid="stPopover"] {
+    right: 26px !important;
+    bottom: 24px !important;
+    width: 60px !important;
+    height: 60px !important;
+}
+
+div[data-testid="stPopover"] > button {
+    width: 60px !important;
+    min-width: 60px !important;
+    height: 60px !important;
+    min-height: 60px !important;
+    border-radius: 50% !important;
+    background: #493875 !important;
+    border: 2px solid #FFFFFF !important;
+}
+
+@media (max-width: 600px) {
+    div[data-testid="stPopoverBody"] {
+        width: min(350px, calc(100vw - 24px)) !important;
+        max-width: calc(100vw - 24px) !important;
+        max-height: calc(100vh - 90px) !important;
+    }
+}
+
+
+/* ========================================
+   22. REBUILT TUTOR POPOVER — CLEAN LAYOUT
+   ======================================== */
+
+/* Panel geometry */
+div[data-testid="stPopoverBody"] {
+    width: 390px !important;
+    max-width: min(390px, calc(100vw - 24px)) !important;
+    max-height: min(570px, calc(100vh - 90px)) !important;
+    overflow-y: auto !important;
+    padding: 16px !important;
+    box-sizing: border-box !important;
+    border: 1px solid #DDD5E8 !important;
+    border-radius: 20px !important;
+    background: #FBFAFD !important;
+    box-shadow: 0 14px 38px rgba(42, 30, 68, 0.20) !important;
+}
+
+/* Override excessive Streamlit spacing in the panel */
+div[data-testid="stPopoverBody"] [data-testid="stVerticalBlock"] {
+    gap: 0.45rem !important;
+}
+
+/* Purpose-built header avoids Markdown heading/caption overlap */
+.cb-tutor-header {
+    display: flex;
+    align-items: center;
+    gap: 11px;
+    padding: 2px 0 10px;
+    margin-bottom: 4px;
+    border-bottom: 1px solid #EAE5F0;
+}
+
+.cb-tutor-avatar {
+    display: flex;
+    flex: 0 0 42px;
+    width: 42px;
+    height: 42px;
+    align-items: center;
+    justify-content: center;
+    border-radius: 14px;
+    background: #59418D;
+    color: #FFFFFF;
+    font-size: 23px;
+    font-weight: 700;
+}
+
+.cb-tutor-title {
+    color: #2C2340;
+    font-size: 17px;
+    font-weight: 800;
+    line-height: 1.25;
+    margin: 0;
+}
+
+.cb-tutor-subtitle {
+    color: #746B83;
+    font-size: 12px;
+    line-height: 1.35;
+    margin-top: 3px;
+}
+
+.cb-tutor-lesson {
+    display: inline-block;
+    max-width: 100%;
+    width: fit-content;
+    margin: 2px 0 6px;
+    padding: 6px 10px;
+    border-radius: 8px;
+    background: #EEE9F5;
+    color: #59418D;
+    font-size: 12px;
+    font-weight: 700;
+    line-height: 1.35;
+    overflow-wrap: anywhere;
+}
+
+/* Toggle label wraps instead of being clipped */
+div[data-testid="stPopoverBody"] [data-testid="stToggle"] {
+    margin: 2px 0 5px !important;
+}
+
+div[data-testid="stPopoverBody"] [data-testid="stToggle"] label {
+    white-space: normal !important;
+    align-items: center !important;
+    color: #403650 !important;
+    font-size: 13px !important;
+    line-height: 1.35 !important;
+}
+
+/* Empty state is intentionally short */
+.cb-tutor-empty {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    min-height: 112px;
+    padding: 12px 16px;
+    margin: 4px 0;
+    border: 1px dashed #D8CDE6;
+    border-radius: 14px;
+    background: #F7F4FA;
+}
+
+.cb-tutor-empty-icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 32px;
+    height: 32px;
+    margin-bottom: 7px;
+    border-radius: 10px;
+    background: #E8E0F2;
+    color: #59418D;
+    font-size: 19px;
+}
+
+.cb-tutor-empty-title {
+    color: #332A48;
+    font-size: 13px;
+    font-weight: 700;
+    line-height: 1.4;
+}
+
+.cb-tutor-empty-copy {
+    max-width: 270px;
+    margin-top: 3px;
+    color: #766E84;
+    font-size: 11px;
+    line-height: 1.45;
+}
+
+/* Conversation transcript */
+div[data-testid="stPopoverBody"] [data-testid="stChatMessage"] {
+    display: flex !important;
+    align-items: flex-start !important;
+    gap: 9px !important;
+    margin: 5px 0 !important;
+    padding: 10px 11px !important;
+    border: 1px solid #E8E2EF !important;
+    border-radius: 13px !important;
+    background: #FFFFFF !important;
+    box-shadow: none !important;
+}
+
+div[data-testid="stPopoverBody"] [data-testid="stChatMessage"] p {
+    color: #332B43 !important;
+    font-size: 13px !important;
+    line-height: 1.55 !important;
+}
+
+/* Input dock: compact one-line composer */
+div[data-testid="stPopoverBody"] [data-testid="stForm"] {
+    position: sticky !important;
+    bottom: 0 !important;
+    z-index: 8 !important;
+    margin: 8px 0 0 !important;
+    padding: 8px !important;
+    border: 1px solid #DED6E9 !important;
+    border-radius: 14px !important;
+    background: #FFFFFF !important;
+    box-shadow: 0 -3px 12px rgba(42, 30, 68, 0.06) !important;
+}
+
+div[data-testid="stPopoverBody"] [data-testid="stForm"] [data-testid="stHorizontalBlock"] {
+    align-items: center !important;
+    gap: 7px !important;
+}
+
+div[data-testid="stPopoverBody"] [data-testid="stForm"] [data-testid="stTextInput"] {
+    margin: 0 !important;
+}
+
+div[data-testid="stPopoverBody"] [data-testid="stForm"] input {
+    height: 42px !important;
+    min-height: 42px !important;
+    border: 1px solid #E7E1EF !important;
+    border-radius: 10px !important;
+    background: #F5F2F8 !important;
+    color: #302743 !important;
+    font-size: 13px !important;
+    padding: 0 11px !important;
+}
+
+div[data-testid="stPopoverBody"] [data-testid="stFormSubmitButton"] button {
+    width: 42px !important;
+    min-width: 42px !important;
+    height: 42px !important;
+    min-height: 42px !important;
+    padding: 0 !important;
+    border: 0 !important;
+    border-radius: 10px !important;
+    background: #59418D !important;
+    color: #FFFFFF !important;
+    box-shadow: none !important;
+}
+
+/* Clear conversation is quiet and doesn't float over the title */
+div[data-testid="stPopoverBody"] [data-testid="stButton"] button {
+    width: auto !important;
+    min-width: 0 !important;
+    min-height: 32px !important;
+    height: 32px !important;
+    padding: 0 10px !important;
+    border-radius: 9px !important;
+    font-size: 11px !important;
+    box-shadow: none !important;
+}
+
+/* Floating launcher stays circular and text-free */
+div[data-testid="stPopover"] {
+    position: fixed !important;
+    right: 24px !important;
+    bottom: 22px !important;
+    z-index: 100000 !important;
+    width: 58px !important;
+    height: 58px !important;
+}
+
+div[data-testid="stPopover"] > button {
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    width: 58px !important;
+    min-width: 58px !important;
+    height: 58px !important;
+    min-height: 58px !important;
+    padding: 0 !important;
+    border-radius: 50% !important;
+    background: #493875 !important;
+    color: #FFFFFF !important;
+    border: 2px solid #FFFFFF !important;
+    box-shadow: 0 6px 18px rgba(42, 30, 68, 0.24) !important;
+}
+
+@media (max-width: 600px) {
+    div[data-testid="stPopoverBody"] {
+        width: min(350px, calc(100vw - 20px)) !important;
+        max-width: calc(100vw - 20px) !important;
+        max-height: calc(100vh - 85px) !important;
+        padding: 13px !important;
+    }
+}
+
+
+/* Lesson Studio - Lesson Dropdown */
+
+.st-key-lesson_selector {
+    margin-top: 12px !important;
+    margin-bottom: 20px !important;
+}
+
+/* Dropdown background and border */
+.st-key-lesson_selector [data-baseweb="select"] > div {
+    background-color: #FFFFFF !important;
+    border: 2px solid #8065AD !important;
+    border-radius: 14px !important;
+    min-height: 56px !important;
+    box-shadow: 0 3px 12px rgba(73, 56, 117, 0.10) !important;
+}
+
+/* Selected lesson text */
+.st-key-lesson_selector [role="combobox"] {
+    color: #302448 !important;
+    font-size: 15px !important;
+    font-weight: 600 !important;
+}
+
+/* Dropdown arrow */
+.st-key-lesson_selector svg {
+    color: #59418D !important;
+    fill: #59418D !important;
+    width: 22px !important;
+    height: 22px !important;
+}
+
+/* Hover effect */
+.st-key-lesson_selector [data-baseweb="select"] > div:hover {
+    background-color: #F5F0FA !important;
+    border-color: #59418D !important;
+}
+
+/* Focus effect */
+.st-key-lesson_selector [data-baseweb="select"]:focus-within > div {
+    border-color: #493875 !important;
+    box-shadow: 0 0 0 3px rgba(89, 65, 141, 0.16) !important;
 }

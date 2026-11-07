@@ -1,4 +1,3 @@
-
 import json
 
 from groq import (
@@ -78,6 +77,38 @@ class GroqClient:
 
         return self._extract_text(response)
 
+    def chat(
+        self,
+        messages: list[dict],
+        max_completion_tokens: int | None = None,
+        reasoning_effort: str | None = None,
+    ) -> str:
+        if not isinstance(messages, list) or not messages:
+            raise ValueError("Messages cannot be empty.")
+
+        for message in messages:
+            if (
+                not isinstance(message, dict)
+                or message.get("role") not in {"system", "user", "assistant"}
+                or not isinstance(message.get("content"), str)
+                or not message["content"].strip()
+            ):
+                raise ValueError("Invalid chat message.")
+
+        extra = {}
+
+        if max_completion_tokens is not None:
+            extra["max_completion_tokens"] = max_completion_tokens
+
+        if (
+            reasoning_effort is not None
+            and self.model in REASONING_MODELS
+        ):
+            extra["reasoning_effort"] = reasoning_effort
+
+        response = self._chat(messages, **extra)
+        return self._extract_text(response)
+
     def generate_json(
         self,
         prompt: str,
@@ -86,6 +117,7 @@ class GroqClient:
         system_prompt: str | None = None,
         max_completion_tokens: int | None = None,
         reasoning_effort: str | None = None,
+        history: list[dict] | None = None,
     ) -> dict:
         if not isinstance(prompt, str) or not prompt.strip():
             raise ValueError("Prompt cannot be empty.")
@@ -122,6 +154,22 @@ class GroqClient:
                     "content": system_prompt.strip(),
                 }
             )
+
+        if history:
+            for message in history:
+                if (
+                    not isinstance(message, dict)
+                    or message.get("role") not in {"user", "assistant"}
+                    or not isinstance(message.get("content"), str)
+                    or not message["content"].strip()
+                ):
+                    raise ValueError("Invalid history message.")
+                messages.append(
+                    {
+                        "role": message["role"],
+                        "content": message["content"].strip(),
+                    }
+                )
 
         messages.append(
             {
