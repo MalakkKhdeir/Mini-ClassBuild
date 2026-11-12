@@ -24,6 +24,8 @@ from classbuild.llm.exceptions import (
 )
 
 
+
+
 STRICT_SCHEMA_MODELS = {
     "openai/gpt-oss-20b",
     "openai/gpt-oss-120b",
@@ -34,14 +36,31 @@ REASONING_MODELS = {
     "openai/gpt-oss-120b",
 }
 
+import re
+
+
+def redact_secrets(text: str) -> str:
+    """Redact sensitive credentials from error messages."""
+    patterns = [
+        r"gsk_[A-Za-z0-9_-]{10,}",
+        r"sk-[A-Za-z0-9_-]{10,}",
+        r"(?i)(api[_-]?key|token|secret|password)\s*[:=]\s*['\"]?[^'\"\s,]+",
+        r"(?i)bearer\s+[A-Za-z0-9._-]+",
+    ]
+
+    for pattern in patterns:
+        text = re.sub(pattern, "[REDACTED]", text)
+
+    return text
 
 class GroqClient:
     def __init__(
-        self,
-        api_key: str | None = None,
-        model: str | None = None,
-        timeout_seconds: int | None = None,
-    ):
+    self,
+    api_key: str | None = None,
+    model: str | None = None,
+    timeout_seconds: int | None = None,
+    max_retries: int | None = None,
+):
         settings = get_settings()
 
         api_key = api_key or settings.groq_api_key
@@ -52,6 +71,12 @@ class GroqClient:
             else settings.request_timeout_seconds
         )
 
+        max_retries = (
+    max_retries
+    if max_retries is not None
+    else settings.max_retries
+)
+
         if not api_key:
             raise MissingAPIKeyError(
                 "GROQ_API_KEY is missing. Add it to your .env file."
@@ -60,6 +85,7 @@ class GroqClient:
         self.client = Groq(
             api_key=api_key,
             timeout=timeout,
+            max_retries=max_retries,
         )
 
     def supports_strict_schema(self) -> bool:
@@ -342,6 +368,6 @@ class GroqClient:
                 message = error.get("message")
 
                 if isinstance(message, str) and message.strip():
-                    return message
+                    return redact_secrets(message)
 
-        return str(exc)
+        return redact_secrets(str(exc))

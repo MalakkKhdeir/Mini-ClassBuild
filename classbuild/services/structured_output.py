@@ -43,13 +43,36 @@ def describe_validation_error(exc: ValidationError) -> list[str]:
         problems.append(f"{location}: {error['msg']}")
     return problems
 
+def redact_secrets(text: str) -> str:
+    """Redact common API secret patterns from text."""
+    import re
+
+    patterns = [
+        r"sk-[A-Za-z0-9_-]{10,}",
+        r"(?i)(api[_-]?key|token|secret|password)\s*[:=]\s*['\"]?[^'\"\s,]+",
+        r"(?i)bearer\s+[A-Za-z0-9._-]+",
+        r"gsk_[A-Za-z0-9_-]{10,}",
+    ]
+
+    for pattern in patterns:
+        text = re.sub(pattern, "[REDACTED]", text)
+
+    return text
 
 def _log_structured_failure(logger, model: str, attempt: int, exc: Exception):
-    preview = str(getattr(exc, "failed_generation", ""))[:LOG_PREVIEW_CHARS]
     category = getattr(exc, "category", "unknown")
+
+    preview = redact_secrets(
+        str(getattr(exc, "failed_generation", ""))
+    )[:LOG_PREVIEW_CHARS]
+
     logger.warning(
         "Structured generation failed | model=%s | attempt=%s/%s | category=%s | preview=%r",
-        model, attempt, MAX_ATTEMPTS, category, preview,
+        model,
+        attempt,
+        MAX_ATTEMPTS,
+        category,
+        preview,
     )
 
 

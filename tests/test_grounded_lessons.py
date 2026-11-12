@@ -19,6 +19,9 @@ from classbuild.services.grounded_lesson_generator import (
     InsufficientEvidenceError,
     CITATION_RETRY_NOTE,
     SearchResult,
+    PAGE_MENTION,
+    mentioned_pages,
+    uncited_page_mentions,
 )
 from classbuild.llm.exceptions import InvalidJSONError
 from classbuild.services.structured_output import StructuredGenerationError
@@ -806,3 +809,35 @@ InvalidJSONError("Invalid JSON", category="invalid_json"),
 
 if __name__ == "__main__":
     unittest.main()
+
+
+class TestPageMentions(unittest.TestCase):
+
+    def test_finds_page_number_formats(self):
+        text = "See page 3, p. 5 and pp. 7."
+
+        self.assertEqual(
+            mentioned_pages(text),
+            {3, 5, 7},
+        )
+
+    def test_finds_uncited_pages(self):
+        lesson = SimpleNamespace(
+            title="AI Basics",
+            introduction="Read page 5.",
+            summary="See page 3.",
+            sections=[
+                SimpleNamespace(
+                    heading="Introduction",
+                    explanation="Details on page 5.",
+                    example="Example from page 3.",
+                )
+            ],
+            exercises=[],
+            cited_pages=[3],
+        )
+
+        self.assertEqual(
+            uncited_page_mentions(lesson),
+            {5},
+        )

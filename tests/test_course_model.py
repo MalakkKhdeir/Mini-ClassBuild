@@ -52,3 +52,19 @@ def test_course_rejects_more_than_five_lessons():
 
     with pytest.raises(ValidationError):
         Course.model_validate(data)
+
+def test_course_rejects_duplicate_lesson_titles():
+    data = make_valid_course_data()
+    data["lessons"][1]["title"] = "lesson 1"
+
+    with pytest.raises(ValidationError):
+        Course.model_validate(data)
+
+
+def test_course_accepts_different_lesson_titles():
+    data = make_valid_course_data()
+    data["lessons"][1]["title"] = "Python Functions"
+
+    course = Course.model_validate(data)
+
+    assert len(course.lessons) == 2

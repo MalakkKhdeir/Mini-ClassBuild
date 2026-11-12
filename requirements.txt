@@ -1,4 +1,16 @@
+
 streamlit
 groq
 pydantic>=2
 python-dotenv
+
+# PDF processing
+pypdf
+
+# RAG and embeddings
+sentence-transformers
+numpy
+
+# Testing
+pytest
+httpx

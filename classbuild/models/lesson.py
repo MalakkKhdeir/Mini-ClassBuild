@@ -116,7 +116,6 @@ class LessonContent(Lesson):
             for source_id in section.source_ids
         ]
 
-        # Ordinary lessons cannot contain PDF citations
         if grounding is None:
             if all_source_ids:
                 raise ValueError(
@@ -124,7 +123,6 @@ class LessonContent(Lesson):
                 )
             return self
 
-        # Grounded lessons must cite at least one source
         if not all_source_ids:
             raise ValueError(
                 "Grounded lessons must cite at least one source."
@@ -138,13 +136,11 @@ class LessonContent(Lesson):
         cited_ids = set(all_source_ids)
         available_ids = set(available_sources)
 
-        # Every citation must exist
         if not cited_ids.issubset(available_ids):
             raise ValueError(
                 "Unknown source ID was cited."
             )
 
-        # Every listed source must be used
         if cited_ids != available_ids:
             raise ValueError(
                 "Unused sources are not allowed."
@@ -152,7 +148,6 @@ class LessonContent(Lesson):
 
         context = info.context or {}
 
-        # Check the current PDF fingerprint
         expected_fingerprint = context.get(
             "expected_fingerprint"
         )
@@ -165,7 +160,6 @@ class LessonContent(Lesson):
                 "Lesson sources belong to a different PDF."
             )
 
-        # Check sources against actual retrieved passages
         allowed_sources = context.get("allowed_sources")
 
         if allowed_sources is not None:

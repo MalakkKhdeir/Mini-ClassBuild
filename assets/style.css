@@ -1678,3 +1678,367 @@ div[data-testid="stPopover"] > button {
     border-color: #493875 !important;
     box-shadow: 0 0 0 3px rgba(89, 65, 141, 0.16) !important;
 }
+
+
+
+/* =========================================================
+   20. SPACING REFINEMENTS — KEEP THE ORIGINAL CLASSBUILD LOOK
+   These rules only improve rhythm, alignment and readability.
+   Original colors, typography, components and interactions stay intact.
+   ========================================================= */
+
+/* Main page rhythm */
+[data-testid="stMainBlockContainer"] {
+    padding-top: 1.8rem;
+    padding-bottom: 6rem;
+    padding-left: clamp(1.25rem, 3vw, 2.5rem);
+    padding-right: clamp(1.25rem, 3vw, 2.5rem);
+}
+
+/* Give sections a consistent amount of breathing room */
+[data-testid="stVerticalBlock"] {
+    gap: 0.9rem;
+}
+
+/* Avoid excessive gaps inside compact form and card areas */
+[data-testid="stForm"] [data-testid="stVerticalBlock"],
+.cb-card [data-testid="stVerticalBlock"] {
+    gap: 0.65rem;
+}
+
+/* Hero spacing */
+.cb-hero {
+    margin-top: 0.25rem;
+    margin-bottom: 1.6rem;
+    padding: 1.8rem 2rem;
+}
+
+.cb-hero h1 {
+    margin-top: 0.2rem;
+    margin-bottom: 0.7rem;
+}
+
+.cb-hero p {
+    max-width: 760px;
+}
+
+/* Course setup expander */
+div[data-testid="stExpander"] {
+    margin-bottom: 1rem;
+}
+
+div[data-testid="stExpander"] summary {
+    padding-top: 0.85rem;
+    padding-bottom: 0.85rem;
+}
+
+div[data-testid="stExpander"] [data-testid="stExpanderDetails"] {
+    padding: 1.1rem 1rem 1rem;
+}
+
+/* Form controls: consistent vertical spacing */
+[data-testid="stWidgetLabel"] {
+    margin-bottom: 0.25rem;
+}
+
+div[data-baseweb="input"] > div,
+div[data-baseweb="select"] > div,
+div[data-baseweb="textarea"] > div {
+    min-height: 2.8rem;
+}
+
+[data-testid="stFileUploader"] {
+    margin-top: 0.35rem;
+    margin-bottom: 0.6rem;
+}
+
+/* Buttons: align height without changing their existing colors */
+.stButton > button,
+.stFormSubmitButton > button,
+button[data-testid="stBaseButton-primary"],
+button[data-testid="stBaseButton-secondary"] {
+    min-height: 2.75rem;
+    padding: 0.62rem 1.15rem;
+}
+
+/* Course overview cards */
+.cb-card {
+    height: 100%;
+    margin-bottom: 0.65rem;
+    padding: 1.25rem 1.35rem;
+}
+
+.cb-card-label {
+    margin-bottom: 0.5rem;
+}
+
+.cb-card-value {
+    line-height: 1.35;
+}
+
+/* Lesson title and lesson content */
+.cb-lesson-title {
+    margin-top: 0.35rem;
+    margin-bottom: 0.8rem;
+}
+
+[data-testid="stMarkdownContainer"] h2 {
+    margin-top: 1.25rem;
+    margin-bottom: 0.65rem;
+}
+
+[data-testid="stMarkdownContainer"] h3 {
+    margin-top: 1rem;
+    margin-bottom: 0.5rem;
+}
+
+[data-testid="stMarkdownContainer"] p {
+    margin-bottom: 0.7rem;
+}
+
+/* Lesson selector */
+.st-key-lesson_selector {
+    margin-top: 0.25rem;
+    margin-bottom: 0.85rem;
+}
+
+/* Quiz: separate questions more clearly */
+[data-testid="stForm"] [data-testid="stMarkdownContainer"] h3 {
+    margin-top: 0.5rem;
+    margin-bottom: 0.4rem;
+}
+
+div[role="radiogroup"] {
+    gap: 0.6rem;
+    margin-top: 0.4rem;
+    margin-bottom: 0.8rem;
+}
+
+div[role="radiogroup"] label {
+    padding: 0.65rem 0.85rem;
+}
+
+/* Tutor popover: keep its existing floating style, improve internal spacing */
+div[data-testid="stPopoverBody"] {
+    padding: 1.1rem !important;
+}
+
+div[data-testid="stPopoverBody"] [data-testid="stVerticalBlock"] {
+    gap: 0.65rem;
+}
+
+div[data-testid="stPopoverBody"] [data-testid="stChatMessage"] {
+    margin: 0.55rem 0 !important;
+}
+
+/* Sidebar rhythm */
+[data-testid="stSidebar"] [data-testid="stVerticalBlock"] {
+    gap: 0.75rem;
+}
+
+[data-testid="stSidebar"] hr {
+    margin-top: 1rem;
+    margin-bottom: 1rem;
+}
+
+/* Footer breathing room */
+.cb-footer {
+    margin-top: 1.5rem;
+    padding-top: 1.25rem;
+}
+
+/* Tablet and mobile: preserve the same look with tighter spacing */
+@media (max-width: 800px) {
+    [data-testid="stMainBlockContainer"] {
+        padding-top: 1.1rem;
+        padding-left: 1rem;
+        padding-right: 1rem;
+        padding-bottom: 6rem;
+    }
+
+    .cb-hero {
+        padding: 1.25rem 1.35rem;
+        margin-bottom: 1.1rem;
+    }
+
+    .cb-card {
+        padding: 1rem;
+    }
+
+    div[data-testid="stExpander"] [data-testid="stExpanderDetails"] {
+        padding: 0.85rem 0.75rem;
+    }
+}
+
+@media (max-width: 480px) {
+    [data-testid="stMainBlockContainer"] {
+        padding-left: 0.8rem;
+        padding-right: 0.8rem;
+    }
+
+    .cb-hero {
+        padding: 1.05rem 1rem;
+        border-radius: 16px;
+    }
+
+    .cb-card {
+        padding: 0.9rem;
+    }
+
+    div[data-testid="stPopoverBody"] {
+        width: calc(100vw - 24px) !important;
+        max-width: calc(100vw - 24px) !important;
+    }
+}
+
+
+/* =========================================================
+   21. SIDEBAR — FIXED WIDTH + CLEAR SCROLL AFFORDANCE
+   Keeps the original ClassBuild colors and visual style.
+   ========================================================= */
+
+/* Keep the sidebar width consistent across reruns and screens. */
+section[data-testid="stSidebar"] {
+    width: 340px !important;
+    min-width: 340px !important;
+    max-width: 340px !important;
+    flex: 0 0 340px !important;
+}
+
+/* Give the sidebar its own predictable vertical scroll area. */
+section[data-testid="stSidebar"] [data-testid="stSidebarContent"] {
+    height: 100vh !important;
+    height: 100dvh !important;
+    overflow-y: auto !important;
+    overflow-x: hidden !important;
+    scrollbar-width: thin;
+    scrollbar-color: #8f79b9 #e9e3f1;
+    overscroll-behavior: contain;
+    position: relative;
+}
+
+/* Make the scrollbar visible instead of relying on a faint overlay bar. */
+section[data-testid="stSidebar"] [data-testid="stSidebarContent"]::-webkit-scrollbar {
+    width: 9px;
+}
+
+section[data-testid="stSidebar"] [data-testid="stSidebarContent"]::-webkit-scrollbar-track {
+    background: #e9e3f1;
+    border-radius: 10px;
+}
+
+section[data-testid="stSidebar"] [data-testid="stSidebarContent"]::-webkit-scrollbar-thumb {
+    background: #8f79b9;
+    border: 2px solid #e9e3f1;
+    border-radius: 10px;
+}
+
+section[data-testid="stSidebar"] [data-testid="stSidebarContent"]::-webkit-scrollbar-thumb:hover {
+    background: #684b98;
+}
+
+/* A subtle bottom fade hints that more sidebar content is below. */
+section[data-testid="stSidebar"] [data-testid="stSidebarContent"]::after {
+    content: "↓  Scroll for more";
+    position: sticky;
+    bottom: 0;
+    display: block;
+    width: 100%;
+    box-sizing: border-box;
+    padding: 12px 8px 10px;
+    margin-top: 8px;
+    text-align: center;
+    font-size: 0.76rem;
+    font-weight: 600;
+    letter-spacing: 0.02em;
+    color: #6d5a8d;
+    background: linear-gradient(
+        to bottom,
+        rgba(233, 227, 241, 0),
+        rgba(233, 227, 241, 0.96) 42%
+    );
+    pointer-events: none;
+}
+
+/* Keep the sidebar content comfortably inset at the fixed width. */
+section[data-testid="stSidebar"] [data-testid="stSidebarUserContent"] {
+    padding-bottom: 1.5rem;
+}
+
+/* On narrow phones, retain one fixed sidebar width that fits the viewport. */
+@media (max-width: 480px) {
+    section[data-testid="stSidebar"] {
+        width: 340px !important;
+        min-width: 340px !important;
+        max-width: 340px !important;
+        flex: 0 0 340px !important;
+    }
+}
+
+
+/* =========================================================
+   22. SIDEBAR SPACING + BRAND ALIGNMENT REFINEMENT
+   Keep original colors and fixed sidebar width.
+   ========================================================= */
+
+/* Reduce the oversized vertical gaps between sidebar sections. */
+section[data-testid="stSidebar"] [data-testid="stSidebarUserContent"] {
+    padding-top: 1.15rem !important;
+    padding-bottom: 0.75rem !important;
+}
+
+section[data-testid="stSidebar"] [data-testid="stMarkdownContainer"] {
+    margin-bottom: 0.35rem !important;
+}
+
+section[data-testid="stSidebar"] [data-testid="stVerticalBlock"] {
+    gap: 0.55rem !important;
+}
+
+/* Tighten separators and heading rhythm. */
+section[data-testid="stSidebar"] hr {
+    margin: 0.55rem 0 !important;
+}
+
+section[data-testid="stSidebar"] h3,
+section[data-testid="stSidebar"] h2 {
+    margin-top: 0.55rem !important;
+    margin-bottom: 0.35rem !important;
+}
+
+section[data-testid="stSidebar"] p {
+    margin-bottom: 0.35rem !important;
+}
+
+/* Make the ClassBuild brand larger, with its tagline centered below it. */
+section[data-testid="stSidebar"] .cb-brand {
+    font-size: 2.65rem !important;
+    line-height: 1.08 !important;
+    text-align: center !important;
+    white-space: nowrap !important;
+    margin: 0 auto 0.2rem !important;
+}
+
+section[data-testid="stSidebar"] .cb-tagline {
+    text-align: center !important;
+    margin: 0 auto 0.35rem !important;
+    line-height: 1.35 !important;
+}
+
+/* Compact the storage controls without changing their colors. */
+section[data-testid="stSidebar"] [data-testid="stSelectbox"],
+section[data-testid="stSidebar"] [data-testid="stButton"] {
+    margin-top: 0.15rem !important;
+    margin-bottom: 0.25rem !important;
+}
+
+section[data-testid="stSidebar"] [data-testid="stButton"] button {
+    min-height: 3.1rem !important;
+}
+
+/* Keep the scroll hint close to the content, not as a large footer gap. */
+section[data-testid="stSidebar"] [data-testid="stSidebarContent"]::after {
+    margin-top: 0.15rem !important;
+    padding-top: 0.45rem !important;
+    padding-bottom: 0.45rem !important;
+}

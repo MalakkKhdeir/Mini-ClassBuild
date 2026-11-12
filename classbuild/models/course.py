@@ -1,7 +1,6 @@
 
 from uuid import uuid4
-
-from pydantic import BaseModel, Field, ConfigDict, PrivateAttr
+from pydantic import BaseModel, Field, ConfigDict, PrivateAttr, model_validator
 
 
 class OutlineLesson(BaseModel):
@@ -23,6 +22,20 @@ class Course(BaseModel):
     description: str = Field(min_length=1)
     objectives: list[str] = Field(min_length=1)
     lessons: list[OutlineLesson] = Field(min_length=2, max_length=5)
+
+    def check_unique_lesson_titles(self) -> None:
+        titles = [
+            lesson.title.strip().casefold()
+            for lesson in self.lessons
+        ]
+
+        if len(titles) != len(set(titles)):
+            raise ValueError("Lesson titles must be unique.")
+
+    @model_validator(mode="after")
+    def validate_unique_lesson_titles(self):
+        self.check_unique_lesson_titles()
+        return self
 
     @property
     def course_id(self) -> str:

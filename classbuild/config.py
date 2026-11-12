@@ -5,6 +5,8 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
+DEFAULT_MAX_RETRIES = 1
+MAX_ALLOWED_RETRIES = 3
 
 DEFAULT_MODEL = "openai/gpt-oss-20b"
 DEFAULT_TIMEOUT_SECONDS = 60
@@ -14,6 +16,7 @@ class Settings:
     groq_api_key: str
     groq_model: str
     request_timeout_seconds: int
+    max_retries: int
 
 
 
@@ -24,7 +27,17 @@ def get_settings() -> Settings:
         "GROQ_TIMEOUT_SECONDS",
         str(DEFAULT_TIMEOUT_SECONDS)
     ).strip()
+    retries_value = os.getenv(
+        "GROQ_MAX_RETRIES",
+        str(DEFAULT_MAX_RETRIES),
+    ).strip()
 
+    try:
+        max_retries = int(retries_value)
+    except ValueError:
+        max_retries = DEFAULT_MAX_RETRIES
+
+    max_retries = max(0, min(max_retries, MAX_ALLOWED_RETRIES))
     try:
         timeout = int(timeout_value)
     except ValueError:
@@ -34,4 +47,5 @@ def get_settings() -> Settings:
         groq_api_key=api_key,
         groq_model=model,
         request_timeout_seconds=timeout,
+                max_retries=max_retries,
     )

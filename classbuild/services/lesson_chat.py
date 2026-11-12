@@ -12,6 +12,10 @@ from classbuild.services.structured_output import (
     StructuredGenerationError,
 )
 
+from classbuild.services.grounded_lesson_generator import (
+    PAGE_MENTION,
+    mentioned_pages,
+)
 
 MAX_QUESTION_CHARS = 1000
 MAX_HISTORY_TURNS = 6
@@ -225,13 +229,6 @@ def pdf_answer_schema(allowed_ids: list[str]) -> dict:
         },
         "required": ["content", "evidence_sufficient", "source_ids"],
         "additionalProperties": False,
-    }
-
-
-def mentioned_pages(text: str) -> set[int]:
-    return {
-        int(page)
-        for page in re.findall(r"\[p(\d+)-c\d+\]", text)
     }
 
 

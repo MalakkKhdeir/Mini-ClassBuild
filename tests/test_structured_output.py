@@ -1,7 +1,7 @@
 
 import pytest
 from pydantic import BaseModel, Field, ValidationError
-
+from classbuild.services.structured_output import redact_secrets
 from classbuild.llm.exceptions import InvalidJSONError
 from classbuild.services.structured_output import (
     strict_schema,
@@ -119,3 +119,31 @@ def test_request_does_not_retry_other_errors():
         )
 
     assert len(client.calls) == 1
+
+
+
+
+def test_redact_api_key():
+    text = "API_KEY=sk-1234567890abcdefgh"
+
+    result = redact_secrets(text)
+
+    assert "sk-1234567890abcdefgh" not in result
+    assert "[REDACTED]" in result
+
+
+def test_redact_bearer_token():
+    text = "Authorization: Bearer abc123XYZ.token"
+
+    result = redact_secrets(text)
+
+    assert "abc123XYZ.token" not in result
+    assert "[REDACTED]" in result   
+
+def test_redact_groq_api_key():
+    text = "API_KEY=gsk_1234567890abcdefgh"
+
+    result = redact_secrets(text)
+
+    assert "gsk_1234567890abcdefgh" not in result
+    assert "[REDACTED]" in result

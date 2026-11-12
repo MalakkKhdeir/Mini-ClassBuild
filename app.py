@@ -10,7 +10,6 @@ from classbuild.services.course_generator import CourseGenerator, CourseGenerati
 from classbuild.services.lesson_generator import LessonGenerator, LessonGenerationError
 from classbuild.services.quiz_generator import QuizGenerator, QuizGenerationError
 from classbuild.services.quiz_grader import QuizGrader
-from uuid import uuid4
 from classbuild.rag.document_state import (
     sync_learning_material,
     attach_material_to_course,
@@ -34,6 +33,13 @@ from classbuild.services.chat_state import (
     clear_thread,
 )
 from classbuild.models.lesson import LessonContent
+from classbuild.persistence.saved_course import (
+    new_course_id,
+    build_saved_course,
+    SourceDocument,
+)
+from classbuild.persistence.course_store import CourseStore, CourseStorageError
+from classbuild.export.markdown_export import export_markdown
 from classbuild.models.chat import ChatMessage
 from classbuild.services.lesson_chat import (
     LessonChatService,
@@ -59,6 +65,7 @@ with open(css_path, encoding="utf-8") as css_file:
     )
 
 DEFAULT_STATE = {
+    "course_id": None,
     "course_config": None,
     "course_outline": None,
     "selected_lesson": None,
@@ -72,12 +79,16 @@ for state_key, default_value in DEFAULT_STATE.items():
     if state_key not in st.session_state:
         st.session_state[state_key] = default_value
 
+# Keep a valid storage ID for the active course.
+if st.session_state.course_outline and not st.session_state.course_id:
+    st.session_state.course_id = new_course_id()
+
+store = CourseStore()
+
 with st.sidebar:
     st.markdown('<div class="cb-brand">📖 ClassBuild</div>', unsafe_allow_html=True)
     st.markdown('<div class="cb-tagline">Learn. Practice. Build.</div>', unsafe_allow_html=True)
-    st.markdown("---")
-    st.markdown("### Your learning space")
-    st.caption("Create a course, explore lessons, and check your understanding.")
+
     if st.session_state.course_outline:
         side_outline = st.session_state.course_outline
         side_config = st.session_state.course_config or {}
@@ -87,7 +98,96 @@ with st.sidebar:
         st.caption(f"{side_config.get('difficulty', 'Beginner')} · {len(side_outline['lessons'])} lessons")
         st.progress(1.0 if side_outline["lessons"] else 0.0)
     st.markdown("---")
-    st.caption("Small steps build real progress.")
+    
+    st.markdown("### Course storage")
+
+    if st.session_state.course_outline:
+        if st.button("💾 Save current course", use_container_width=True):
+            try:
+                saved_course = build_saved_course(
+                    course_id=st.session_state.course_id,
+                    topic=st.session_state.course_config["topic"],
+                    difficulty=st.session_state.course_config["difficulty"],
+                    outline=st.session_state.course_outline,
+                    lesson_contents=st.session_state.lesson_contents,
+                    quizzes=st.session_state.quizzes,
+                    selected_lesson=st.session_state.selected_lesson,
+                )
+
+                # Keep PDF identity even if no grounded lesson has been generated yet.
+                source_document = material_for_course(st.session_state)
+                if source_document is not None:
+                    saved_course.source_document = SourceDocument(
+                        filename=source_document.filename,
+                        fingerprint=source_document.fingerprint,
+                    )
+                    saved_course.check_consistency()
+
+                store.save(saved_course)
+                st.success("Course saved successfully!")
+            except (ValueError, CourseStorageError) as exc:
+                st.error(f"Could not save course: {exc}")
+
+    try:
+        saved_courses = store.list_courses()
+        if saved_courses:
+            course_options = {
+                f"{item.topic} · {item.difficulty} · {item.created_at:%Y-%m-%d} · {item.course_id[:8]}": item.course_id
+                for item in saved_courses
+            }
+            selected_saved = st.selectbox(
+                "Load a saved course",
+                options=list(course_options.keys()),
+                key="saved_course_selector",
+            )
+            if st.button("📂 Load selected course", use_container_width=True):
+                try:
+                    saved = store.load(course_options[selected_saved])
+                    st.session_state.course_id = saved.course_id
+                    st.session_state.course_config = {
+                        "topic": saved.topic,
+                        "difficulty": saved.difficulty,
+                        "lesson_count": len(saved.outline.lessons),
+                    }
+                    st.session_state.course_outline = saved.outline.model_dump()
+                    st.session_state.lesson_contents = {}
+                    st.session_state.quizzes = {}
+                    st.session_state.quiz_results = {}
+                    st.session_state.quiz_attempts = {}
+                    st.session_state.chats = {}
+                    st.session_state.selected_lesson = saved.selected_lesson
+
+                    titles = [lesson.title for lesson in saved.outline.lessons]
+                    for number, lesson in saved.lessons.items():
+                        title = titles[number - 1]
+                        key = (
+                            saved.course_id,
+                            saved.topic,
+                            saved.difficulty,
+                            len(titles),
+                            title,
+                        )
+                        st.session_state.lesson_contents[key] = lesson.model_dump()
+
+                    for number, quiz in saved.quizzes.items():
+                        title = titles[number - 1]
+                        key = (
+                            saved.course_id,
+                            saved.topic,
+                            saved.difficulty,
+                            len(titles),
+                            title,
+                        )
+                        st.session_state.quizzes[key] = quiz.model_dump()
+
+                    st.success("Course loaded successfully!")
+                    st.rerun()
+                except CourseStorageError as exc:
+                    st.error(f"Could not load course: {exc}")
+        else:
+            st.caption("No saved courses yet.")
+    except CourseStorageError as exc:
+        st.error(f"Storage error: {exc}")
 
 st.markdown(
     """
@@ -160,7 +260,7 @@ if submitted:
             with st.spinner("Designing your course outline..."):
 
                 course = CourseGenerator(GroqClient()).generate(config)
-                st.session_state.course_id = str(uuid4())
+                st.session_state.course_id = new_course_id()
                 st.session_state.course_outline = course.model_dump()
                 attach_material_to_course(st.session_state)
 
@@ -184,6 +284,55 @@ if outline is None:
         unsafe_allow_html=True,
     )
     st.stop()
+
+with st.sidebar:
+    st.markdown("---")
+    st.markdown("### Export")
+    if st.button("📄 Prepare Markdown export", use_container_width=True):
+        try:
+            titles_for_export = [item["title"] for item in outline["lessons"]]
+            lessons_by_number = {}
+            quizzes_by_number = {}
+
+            for key, value in st.session_state.lesson_contents.items():
+                if isinstance(key, tuple) and key[0] == st.session_state.course_id:
+                    title = key[-1]
+                    if title in titles_for_export:
+                        lessons_by_number[titles_for_export.index(title) + 1] = (
+                            LessonContent.model_validate(value)
+                        )
+
+            for key, value in st.session_state.quizzes.items():
+                if isinstance(key, tuple) and key[0] == st.session_state.course_id:
+                    title = key[-1]
+                    if title in titles_for_export:
+                        quizzes_by_number[titles_for_export.index(title) + 1] = (
+                            Quiz.model_validate(value)
+                        )
+
+            export_path = export_markdown(
+                outline=Course.model_validate(outline),
+                topic=course_config["topic"],
+                lessons=lessons_by_number,
+                quizzes=quizzes_by_number,
+                output_dir="exports",
+            )
+            st.session_state["markdown_export_path"] = str(export_path)
+            st.success("Markdown export is ready.")
+        except Exception as exc:
+            st.error(f"Export failed: {exc}")
+
+    export_path_value = st.session_state.get("markdown_export_path")
+    if export_path_value:
+        export_path = Path(export_path_value)
+        if export_path.exists():
+            st.download_button(
+                "⬇️ Download Markdown",
+                data=export_path.read_bytes(),
+                file_name=export_path.name,
+                mime="text/markdown",
+                use_container_width=True,
+            )
 
 st.markdown('<div class="cb-section-label">Course overview</div>', unsafe_allow_html=True)
 st.markdown(f"# {outline['title']}")

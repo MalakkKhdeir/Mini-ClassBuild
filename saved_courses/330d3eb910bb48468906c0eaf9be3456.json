@@ -1,0 +1,98 @@
+{
+  "schema_version": 1,
+  "app": "Mini ClassBuild",
+  "course_id": "330d3eb910bb48468906c0eaf9be3456",
+  "created_at": "2026-11-12T17:26:38.825866Z",
+  "updated_at": "2026-11-12T17:26:38.825866Z",
+  "topic": "intro to assembly 8086",
+  "difficulty": "Beginner",
+  "outline": {
+    "title": "Introduction to 8086 Assembly Language",
+    "description": "A beginner-friendly course that introduces the fundamentals of 8086 assembly programming, covering the processor architecture, basic instructions, and simple programs.",
+    "objectives": [
+      "Understand the architecture and mode of operation of the 8086 CPU.",
+      "Learn how to write, assemble, and run simple 8086 assembly programs.",
+      "Apply basic 8086 instructions and concepts to solve elementary problems.",
+      "Develop debugging skills for assembly code using common tools."
+    ],
+    "lessons": [
+      {
+        "title": "Lesson 1: 8086 Architecture & Environment Setup",
+        "learning_objectives": [
+          "Explain the 8086 processor's 16-bit architecture and its registers.",
+          "Describe real vs protected mode and the concept of segmentation.",
+          "Identify the components of the assembly development environment (assembler, linker, debugger).",
+          "Set up an 8086 development environment and run a “Hello, World” program."
+        ],
+        "summary": "This lesson introduces the 8086 CPU’s structure, the memory segmentation model, and the essential tools needed to write and debug assembly. Students set up their environment and run their first program, establishing confidence before diving into instruction syntax."
+      },
+      {
+        "title": "Lesson 2: Data Movement, Arithmetic, and Logical Operations",
+        "learning_objectives": [
+          "Distinguish between immediate, direct, and indirect addressing modes.",
+          "Execute MOV, ADD, SUB, AND, OR, XOR, and NOT instructions.",
+          "Use flags and conditional jumps to implement simple decision logic.",
+          "Write a program that performs basic arithmetic and displays the result."
+        ],
+        "summary": "Building on the foundation, this lesson covers core data manipulation instructions and control flow. Students practice moving data between registers and memory, perform calculations, and create simple conditionals to understand how 8086 handles logic."
+      },
+      {
+        "title": "Lesson 3: Procedures, Stack, and I/O Basics",
+        "learning_objectives": [
+          "Define and call procedures using CALL and RET.",
+          "Manipulate the stack for parameter passing and local storage.",
+          "Use INT 21h service calls for console input and output.",
+          "Debug a multi-step assembly program and identify common errors."
+        ],
+        "summary": "The final lesson explores function design, stack management, and basic input/output operations. Students construct a small program that uses procedures and the stack, then debug it, cementing their ability to write structured, reusable 8086 assembly code."
+      }
+    ]
+  },
+  "lessons": {
+    "1": {
+      "title": "Lesson 1: 8086 Architecture & Environment Setup",
+      "introduction": "Welcome to the first lesson of our Intro to Assembly 8086 course. In this session we will explore the core features of the 8086 processor, learn about real and protected modes, understand segmentation, and get hands‑on experience setting up a complete development environment to write and run a simple “Hello, World” program.",
+      "sections": [
+        {
+          "heading": "8086 16‑Bit Architecture & Registers",
+          "explanation": "The 8086 is a 16‑bit CISC processor that uses a 20‑bit address bus, allowing it to address up to 1 MiB of memory. Its register set is divided into general‑purpose, segment, and special registers. General‑purpose registers include AX, BX, CX, DX, SI, DI, BP, and SP, each 16 bits wide. Segment registers (CS, DS, SS, ES, FS, GS) define the base of memory segments. The instruction pointer (IP) holds the offset within the CS segment, and the flag register (FLAGS) holds status bits.",
+          "example": "mov ax, 0x1234   ; Load AX with 0x1234\nmov bx, ax        ; BX now contains 0x1234\nmov cx, 0x0      ; Clear CX for loop counter",
+          "source_ids": []
+        },
+        {
+          "heading": "Real vs Protected Mode & Segmentation",
+          "explanation": "In real mode the processor operates like an 8080, with 20‑bit linear addresses constructed by shifting the segment register left 4 bits and adding the offset. Protected mode expands the address space to 32 bits and introduces privilege levels, paging, and protection checks. Segmentation in real mode uses 16‑bit segment:offset pairs to access memory, whereas protected mode can define flat segments or use descriptor tables for advanced memory protection.",
+          "example": "; Real mode segment:offset example\nmov ax, 0xB800 ; video segment\nmov es, ax     ; set ES to video memory\nmov di, 0      ; offset 0\nmov al, 'H'    ; character to print\nmov [es:di], al; store 'H' at video memory",
+          "source_ids": []
+        },
+        {
+          "heading": "Assembly Development Environment Components",
+          "explanation": "A typical 8086 development workflow involves three main tools. The assembler (e.g., MASM, TASM, NASM) translates assembly source code into machine code object files. The linker combines object files and libraries into a single executable, resolving symbols and generating relocation tables. The debugger (e.g., OllyDbg, IDA Free, or simple console debuggers) allows step‑by‑step execution, memory inspection, and breakpoint setting.",
+          "example": "; Example build steps using NASM and LD on DOSBox\nnasm -f bin hello.asm -o hello.com\ndebug hello.com   ; open the program in DOS debugging environment",
+          "source_ids": []
+        },
+        {
+          "heading": "Setting Up the Environment & Running Hello, World",
+          "explanation": "To develop for the 8086 you can use DOSBox as an emulator, along with an assembler such as NASM or MASM. Install DOSBox, place the assembler binaries in a folder, and create a simple COM program that displays a message using DOS interrupt 21h. Compile, link, and run the program inside DOSBox to see the output.",
+          "example": "; hello.asm – simple 8086 hello world\norg 0x100            ; COM program starts at 0x100\nmov ah, 09h          ; DOS print string function\nlea dx, msg          ; address of string\nint 21h              ; call DOS\nmov ah, 4Ch          ; terminate program\nint 21h\nmsg db 'Hello, World!$'",
+          "source_ids": []
+        }
+      ],
+      "summary": "In this lesson we covered the fundamental 8086 architecture, the differences between real and protected mode, the role of segmentation, and the essential tools for assembly development. You also learned how to set up a working environment and write a simple “Hello, World” program that runs inside DOSBox.",
+      "exercises": [
+        {
+          "task": "Write an 8086 assembly snippet that swaps the values in registers CX and DX using only the BX register as a temporary storage.",
+          "hint": "Think about moving values into BX and then swapping back"
+        },
+        {
+          "task": "Using NASM syntax, create a COM program that prints the string \"Assembly is fun!$\" to the screen and then exits cleanly. Describe the steps you would take to compile and run this program in DOSBox.",
+          "hint": "Remember the DOS interrupt 21h function 09h and how to terminate with function 4Ch."
+        }
+      ],
+      "grounding": null
+    }
+  },
+  "quizzes": {},
+  "source_document": null,
+  "selected_lesson": "Lesson 1: 8086 Architecture & Environment Setup"
+}

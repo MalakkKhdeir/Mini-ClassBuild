@@ -20,6 +20,12 @@ from classbuild.rag.retriever import (
 )
 from classbuild.services.structured_output import request_structured_json
 
+import re
+
+PAGE_MENTION = re.compile(
+    r"\b(?:page|pp?\.?)\s*(\d+)\b",
+    re.IGNORECASE,
+)
 
 MIN_PASSAGE_SIMILARITY = 0.30
 
@@ -113,6 +119,8 @@ class InsufficientEvidenceError(Exception):
         self.passages = passages or []
         super().__init__(f"Insufficient PDF evidence: {reason}")
 
+class LessonValidationError(Exception):
+    """Raised when a grounded lesson mentions uncited pages."""
 
 class GroundedSectionDraft(BaseModel):
     model_config = ConfigDict(extra="forbid")
@@ -176,6 +184,41 @@ def select_evidence(
 ):
     """Keep only passages that meet the grounding similarity threshold."""
     return [result for result in results if result.score >= min_similarity]
+
+def mentioned_pages(text: str) -> set[int]:
+    return {
+        int(match)
+        for match in PAGE_MENTION.findall(text)
+    }
+
+def uncited_page_mentions(lesson) -> set[int]:
+    texts = [
+        lesson.title,
+        lesson.introduction,
+        lesson.summary,
+    ]
+
+    for section in lesson.sections:
+        texts.extend([
+            section.heading,
+            section.explanation,
+            section.example,
+        ])
+
+    for exercise in lesson.exercises:
+        texts.extend([
+            exercise.task,
+            exercise.hint,
+        ])
+
+    mentioned = set()
+
+    for text in texts:
+        mentioned.update(mentioned_pages(text))
+
+    cited = set(lesson.cited_pages)
+
+    return mentioned - cited
 
 
 def build_retrieval_queries(outline, lesson) -> list[str]:
@@ -600,9 +643,21 @@ class GroundedLessonGenerator:
             if passage.chunk_id in cited_ids
         ]
 
-        return validate_lesson(
+        validated_lesson = validate_lesson(
             lesson_data,
             expected_title=lesson.title,
             allowed_sources=allowed_sources,
             expected_fingerprint=document.fingerprint,
         )
+
+        problems = uncited_page_mentions(validated_lesson)
+
+        if problems:
+            pages = ", ".join(
+                str(page) for page in sorted(problems)
+            )
+            raise LessonValidationError(
+                f"Lesson mentions pages without citations: {pages}"
+            )
+
+        return validated_lesson
