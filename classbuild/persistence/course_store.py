@@ -3,11 +3,10 @@ import json
 import os
 
 from dataclasses import dataclass
-from datetime import datetime
+from datetime import datetime, timezone
 from pathlib import Path
 
 from classbuild.persistence.saved_course import (
-    APP_NAME,
     COURSE_ID_PATTERN,
     SCHEMA_VERSION,
     SavedCourse,
@@ -54,6 +53,12 @@ class SavedCourseSummary:
     source_filename: str | None = None
 
 
+@dataclass(frozen=True)
+class CourseListNote:
+    filename: str
+    message: str
+
+
 class CourseStore:
     def __init__(self, save_dir: Path | str | None = None):
         if save_dir is None:
@@ -65,6 +70,7 @@ class CourseStore:
         self.save_dir = Path(save_dir).expanduser().resolve()
         self.save_dir.mkdir(parents=True, exist_ok=True)
 
+        self.listing_notes: list[CourseListNote] = []
 
     def _course_path(self, course_id: str) -> Path:
         if not isinstance(course_id, str):
@@ -82,17 +88,13 @@ class CourseStore:
 
         return path
 
-    
     def save(self, course: SavedCourse) -> Path:
         if not isinstance(course, SavedCourse):
             raise TypeError("Expected a SavedCourse object.")
 
         path = self._course_path(course.course_id)
 
-        data = course.model_dump_json(
-            indent=2,
-        )
-
+        data = course.model_dump_json(indent=2)
         encoded_data = data.encode("utf-8")
 
         if len(encoded_data) > MAX_COURSE_FILE_BYTES:
@@ -116,7 +118,6 @@ class CourseStore:
 
         return path
 
-    
     def load(self, course_id: str) -> SavedCourse:
         path = self._course_path(course_id)
 
@@ -163,7 +164,12 @@ class CourseStore:
         ):
             raise
 
-        except (json.JSONDecodeError, UnicodeDecodeError, ValueError, TypeError) as exc:
+        except (
+            json.JSONDecodeError,
+            UnicodeDecodeError,
+            ValueError,
+            TypeError,
+        ) as exc:
             raise CorruptedCourseFileError(
                 "Course file is corrupted or contains invalid data."
             ) from exc
@@ -172,7 +178,6 @@ class CourseStore:
             raise CorruptedCourseFileError(
                 "Could not read the saved course file."
             ) from exc
-
 
     def update(self, course: SavedCourse) -> Path:
         if not isinstance(course, SavedCourse):
@@ -183,7 +188,7 @@ class CourseStore:
         updated_course = course.model_copy(
             update={
                 "created_at": existing_course.created_at,
-                "updated_at": datetime.now().astimezone(),
+                "updated_at": datetime.now(timezone.utc),
             }
         )
 
@@ -191,16 +196,23 @@ class CourseStore:
 
         return self.save(updated_course)
 
-
     def list_courses(self) -> list[SavedCourseSummary]:
         summaries = []
+        self.listing_notes = []
 
         for path in sorted(self.save_dir.glob("*.json")):
             course_id = path.stem
 
             try:
                 course = self.load(course_id)
-            except CourseStorageError:
+
+            except CourseStorageError as exc:
+                self.listing_notes.append(
+                    CourseListNote(
+                        filename=path.name,
+                        message=str(exc),
+                    )
+                )
                 continue
 
             summaries.append(
@@ -221,7 +233,6 @@ class CourseStore:
 
         return summaries
 
-
     def delete(self, course_id: str) -> None:
         path = self._course_path(course_id)
 
@@ -232,14 +243,8 @@ class CourseStore:
 
         try:
             path.unlink()
+
         except OSError as exc:
             raise CourseStorageError(
                 "Could not delete the saved course."
             ) from exc
-
-        
-
-
-
-
-

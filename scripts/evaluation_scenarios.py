@@ -251,4 +251,37 @@ SCENARIOS: list[Scenario] = [
             T + "test_reliability.test_timeout_error_is_understandable",
         ],
     ),
+        Scenario(
+        number=23,
+        name="Saved course round trip",
+        category="saving_and_loading",
+        checks="A saved course can be loaded with its outline, lesson, quiz, and selected lesson intact.",
+        tests=[
+            T + "test_persistence.test_save_and_load_course",
+            T + "test_persistence.test_list_courses",
+        ],
+    ),
+    Scenario(
+        number=24,
+        name="Saved course updates and deletion",
+        category="saving_and_loading",
+        checks="Saved courses can be updated and deleted without losing their identity or creation time.",
+        tests=[
+            T + "test_persistence.test_update_course",
+            T + "test_persistence.test_delete_course",
+        ],
+    ),
+    Scenario(
+        number=25,
+        name="Saved course file safety",
+        category="saving_and_loading",
+        checks="The course store rejects invalid, corrupted, oversized, and unsupported saved-course files.",
+        tests=[
+            T + "test_persistence.test_invalid_course_id",
+            T + "test_persistence.test_load_corrupted_json",
+            T + "test_persistence.test_unsupported_schema_version",
+            T + "test_persistence.test_load_file_too_large",
+            T + "test_persistence.test_save_is_atomic",
+        ],
+    ),
 ]

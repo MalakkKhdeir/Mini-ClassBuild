@@ -1,14 +1,16 @@
+
 # Mini ClassBuild – Validation Audit
 
 ## Purpose
 
-This document records the validation and reliability rules
-implemented in Mini ClassBuild.
+This document records the validation, reliability, and persistence
+rules implemented in Mini ClassBuild.
 
-It identifies the rules that were already enforced and the
-additional rules introduced during Stage 3.
+It identifies the rules enforced by the application and the
+additional safeguards introduced during Stage 3.
 
-The evaluation scenarios provide automated tests for these rules.
+The automated evaluation suite checks these rules through
+offline test scenarios.
 
 ## Status
 
@@ -74,24 +76,55 @@ The evaluation scenarios provide automated tests for these rules.
 | API secrets must be redacted from error messages. | `redact_secrets()` | Fixed in Stage 3 |
 | Structured JSON retries must remain within a fixed request budget. | Structured output retry handling | Fixed in Stage 3 |
 
-## 7. Automated Evaluation
+## 7. Saved Course Persistence
+
+| Rule | Enforcement | Status |
+|---|---|---|
+| Saved courses must follow the supported schema. | `SavedCourse` model validation | Fixed in Stage 3 |
+| Course content must be saved and loaded consistently. | `CourseStore` | Fixed in Stage 3 |
+| Updating a course must preserve its identity. | Course update operation | Fixed in Stage 3 |
+| Invalid course IDs must be rejected. | Course ID validation | Fixed in Stage 3 |
+| Corrupted or unsupported course files must be reported. | Course loading and listing validation | Fixed in Stage 3 |
+| Oversized course files must be rejected. | File-size validation | Fixed in Stage 3 |
+| Saving must use atomic file replacement. | Atomic save operation | Fixed in Stage 3 |
+| Temporary files must not appear as saved courses. | Course listing logic | Fixed in Stage 3 |
+| Saved course content must not include API secrets, chat history, or vector indexes. | Saved course serialization | Fixed in Stage 3 |
+
+## 8. Automated Evaluation
 
 The offline evaluation suite is implemented using:
 
 - `scripts/evaluation_scenarios.py`
 - `scripts/run_evaluation.py`
 
-The evaluation suite checks the implemented rules through
-automated test scenarios.
+The scenarios cover validation, reliability, retrieval, persistence,
+and other application workflows.
 
-Latest evaluation result:
-
-- Total scenarios: 22
-- Passed scenarios: 22
-- Failed scenarios: 0
-- Pass percentage: 100%
+Each scenario is considered successful only when all its required
+tests are found, executed, and passed. Missing or skipped tests
+must not be counted as successful.
 
 Run the evaluation using:
 
 ```bash
 python scripts/run_evaluation.py --no-json
+```
+
+The command prints the current number of scenarios, passed scenarios,
+failed scenarios, and the pass percentage.
+
+Do not treat a previously recorded result as the current result.
+Always run the command to obtain the latest evaluation status.
+
+## 9. Final Verification
+
+Run the final project verification using:
+
+```bash
+python scripts/final_check.py
+```
+
+The final verification checks the project environment, dependencies,
+syntax, unit tests, offline evaluation, and end-to-end tests.
+
+The final result should report success only when all required checks pass.

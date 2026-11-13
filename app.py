@@ -66,6 +66,7 @@ with open(css_path, encoding="utf-8") as css_file:
 
 DEFAULT_STATE = {
     "course_id": None,
+    "saved_course_id": None,
     "course_config": None,
     "course_outline": None,
     "selected_lesson": None,
@@ -74,6 +75,8 @@ DEFAULT_STATE = {
     "quiz_results": {},
     "quiz_attempts": {},
     "chats": {},
+    "saved_content_hash": None,
+    "saved_source_document": None,
 }
 for state_key, default_value in DEFAULT_STATE.items():
     if state_key not in st.session_state:
@@ -84,6 +87,63 @@ if st.session_state.course_outline and not st.session_state.course_id:
     st.session_state.course_id = new_course_id()
 
 store = CourseStore()
+
+
+def course_pdf_material():
+    """Return the PDF only when it matches the course's saved source identity."""
+    document = material_for_course(st.session_state)
+    saved_source = st.session_state.get("saved_source_document")
+
+    if document is None:
+        return None
+
+    # A loaded PDF course may use PDF features only with the exact original
+    # document fingerprint. The filename alone is not sufficient.
+    if saved_source is not None:
+        if document.fingerprint != saved_source.get("fingerprint"):
+            return None
+
+    return document
+
+
+def get_current_saved_course():
+    """Build a SavedCourse snapshot from the current Streamlit session."""
+    config = st.session_state.course_config
+    outline = st.session_state.course_outline
+
+    if not config or not outline:
+        return None
+
+    current_course = build_saved_course(
+        course_id=(
+            st.session_state.saved_course_id
+            or st.session_state.course_id
+        ),
+        topic=config["topic"],
+        difficulty=config["difficulty"],
+        outline=outline,
+        lesson_contents=st.session_state.lesson_contents,
+        quizzes=st.session_state.quizzes,
+        selected_lesson=st.session_state.selected_lesson,
+    )
+
+    # Prefer the currently attached PDF. If the course was loaded without
+    # re-uploading its original PDF, preserve its saved document identity.
+    source_document = course_pdf_material()
+
+    if source_document is not None:
+        current_course.source_document = SourceDocument(
+            filename=source_document.filename,
+            fingerprint=source_document.fingerprint,
+        )
+    elif st.session_state.saved_source_document is not None:
+        current_course.source_document = SourceDocument.model_validate(
+            st.session_state.saved_source_document
+        )
+
+    current_course.check_consistency()
+    return current_course
+
 
 with st.sidebar:
     st.markdown('<div class="cb-brand">📖 ClassBuild</div>', unsafe_allow_html=True)
@@ -98,14 +158,34 @@ with st.sidebar:
         st.caption(f"{side_config.get('difficulty', 'Beginner')} · {len(side_outline['lessons'])} lessons")
         st.progress(1.0 if side_outline["lessons"] else 0.0)
     st.markdown("---")
-    
+
     st.markdown("### Course storage")
+
+    if st.session_state.course_outline:
+        try:
+            current_course = get_current_saved_course()
+            current_hash = current_course.content_hash()
+            saved_hash = st.session_state.saved_content_hash
+
+            if saved_hash is None:
+                st.info("This course has not been saved yet.")
+            elif current_hash != saved_hash:
+                st.warning("You have unsaved changes.")
+            else:
+                st.success("All changes are saved.")
+
+        except (ValueError, CourseStorageError) as exc:
+            st.warning(f"Could not check saved changes: {exc}")
+
 
     if st.session_state.course_outline:
         if st.button("💾 Save current course", use_container_width=True):
             try:
+                storage_course_id = (
+                    st.session_state.saved_course_id or st.session_state.course_id
+                )
                 saved_course = build_saved_course(
-                    course_id=st.session_state.course_id,
+                    course_id=storage_course_id,
                     topic=st.session_state.course_config["topic"],
                     difficulty=st.session_state.course_config["difficulty"],
                     outline=st.session_state.course_outline,
@@ -114,22 +194,59 @@ with st.sidebar:
                     selected_lesson=st.session_state.selected_lesson,
                 )
 
-                # Keep PDF identity even if no grounded lesson has been generated yet.
-                source_document = material_for_course(st.session_state)
-                if source_document is not None:
+
+                # Preserve the original PDF identity for loaded courses.
+                source_document = course_pdf_material()
+                saved_source = st.session_state.saved_source_document
+
+                if saved_source is not None:
+                    saved_course.source_document = SourceDocument.model_validate(
+                        saved_source
+                    )
+                    if (
+                        source_document is not None
+                        and source_document.fingerprint
+                        == saved_source.get("fingerprint")
+                    ):
+                        saved_course.source_document = SourceDocument(
+                            filename=source_document.filename,
+                            fingerprint=source_document.fingerprint,
+                        )
+                elif source_document is not None:
                     saved_course.source_document = SourceDocument(
                         filename=source_document.filename,
                         fingerprint=source_document.fingerprint,
                     )
-                    saved_course.check_consistency()
 
-                store.save(saved_course)
+                saved_course.check_consistency()
+
+                if st.session_state.saved_course_id is not None:
+                    store.update(saved_course)
+                else:
+                    store.save(saved_course)
+
+                st.session_state.saved_course_id = saved_course.course_id
+                st.session_state.saved_content_hash = (
+                    saved_course.content_hash()
+                )
+                st.session_state.saved_source_document = (
+                    saved_course.source_document.model_dump()
+                    if saved_course.source_document is not None
+                    else None
+                )
                 st.success("Course saved successfully!")
             except (ValueError, CourseStorageError) as exc:
                 st.error(f"Could not save course: {exc}")
 
     try:
         saved_courses = store.list_courses()
+
+        for note in store.listing_notes:
+            st.warning(
+                f"Could not read saved course file "
+                f"'{note.filename}': {note.message}"
+            )
+
         if saved_courses:
             course_options = {
                 f"{item.topic} · {item.difficulty} · {item.created_at:%Y-%m-%d} · {item.course_id[:8]}": item.course_id
@@ -143,7 +260,17 @@ with st.sidebar:
             if st.button("📂 Load selected course", use_container_width=True):
                 try:
                     saved = store.load(course_options[selected_saved])
-                    st.session_state.course_id = saved.course_id
+                    st.session_state.saved_content_hash = (
+                        saved.content_hash()
+                    )
+                    st.session_state.saved_source_document = (
+                        saved.source_document.model_dump()
+                        if saved.source_document is not None
+                        else None
+                    )
+                    st.session_state.saved_course_id = saved.course_id
+                    st.session_state.course_id = new_course_id()
+                    active_session_course_id = st.session_state.course_id
                     st.session_state.course_config = {
                         "topic": saved.topic,
                         "difficulty": saved.difficulty,
@@ -161,7 +288,7 @@ with st.sidebar:
                     for number, lesson in saved.lessons.items():
                         title = titles[number - 1]
                         key = (
-                            saved.course_id,
+                            active_session_course_id,
                             saved.topic,
                             saved.difficulty,
                             len(titles),
@@ -172,7 +299,7 @@ with st.sidebar:
                     for number, quiz in saved.quizzes.items():
                         title = titles[number - 1]
                         key = (
-                            saved.course_id,
+                            active_session_course_id,
                             saved.topic,
                             saved.difficulty,
                             len(titles),
@@ -184,6 +311,8 @@ with st.sidebar:
                     st.rerun()
                 except CourseStorageError as exc:
                     st.error(f"Could not load course: {exc}")
+        elif store.listing_notes:
+            st.caption("No readable saved courses were found.")
         else:
             st.caption("No saved courses yet.")
     except CourseStorageError as exc:
@@ -248,6 +377,9 @@ if submitted:
         new_config = config.to_dict()
         same_course = st.session_state.course_config == new_config
         if not same_course:
+            st.session_state.saved_content_hash = None
+            st.session_state.saved_source_document = None
+            st.session_state.saved_course_id = None
             st.session_state.course_outline = None
             st.session_state.selected_lesson = None
             st.session_state.lesson_contents = {}
@@ -261,6 +393,9 @@ if submitted:
 
                 course = CourseGenerator(GroqClient()).generate(config)
                 st.session_state.course_id = new_course_id()
+                st.session_state.saved_content_hash = None
+                st.session_state.saved_source_document = None
+                st.session_state.saved_course_id = None
                 st.session_state.course_outline = course.model_dump()
                 attach_material_to_course(st.session_state)
 
@@ -359,7 +494,7 @@ lesson_titles = [lesson["title"] for lesson in outline["lessons"]]
 
 # Keep only chat threads that still belong to the current course,
 # lesson version, and uploaded PDF.
-chat_document = material_for_course(st.session_state)
+chat_document = course_pdf_material()
 chat_document_fingerprint = (
     chat_document.fingerprint if chat_document is not None else None
 )
@@ -420,7 +555,7 @@ if st.button(
     else:
         try:
             with st.spinner("Preparing your lesson..."):
-                document = material_for_course(st.session_state)
+                document = course_pdf_material()
 
                 if document is not None:
                     course = Course.model_validate(outline)
@@ -532,7 +667,7 @@ for index, exercise in enumerate(lesson_content["exercises"]):
                 st.write(exercise["hint"])
 
 # Floating ClassBuild Tutor
-chat_document = material_for_course(st.session_state)
+chat_document = course_pdf_material()
 parsed_lesson_content = LessonContent.model_validate(lesson_content)
 chat_lesson_number = lesson_titles.index(selected_title) + 1
 
