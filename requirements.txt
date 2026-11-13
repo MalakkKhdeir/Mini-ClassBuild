@@ -1,13 +1,20 @@
+# Mini ClassBuild dependencies
+# Python 3.11 or newer is recommended.
 
+# Application and user interface
 streamlit
+
+# AI model API and configuration
 groq
-pydantic>=2
 python-dotenv
+
+# Data validation and structured outputs
+pydantic>=2
 
 # PDF processing
 pypdf
 
-# RAG and embeddings
+# Retrieval-Augmented Generation (RAG) and embeddings
 sentence-transformers
 numpy
 
